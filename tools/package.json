@@ -1,0 +1,10 @@
+{
+  "name": "both-sides-checkin-tools",
+  "private": true,
+  "scripts": {
+    "pdf": "node make-pdf.js"
+  },
+  "devDependencies": {
+    "playwright": "1.48.2"
+  }
+}

@@ -1,0 +1,1112 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Both Sides Check-in</title>
+<meta name="description" content="A five-minute relationship check-in for couples. Each partner answers on their own phone, then you see how each of you sees the relationship and what to work on first.">
+<meta property="og:title" content="Both Sides Check-in">
+<meta property="og:description" content="Your partner has asked you to do a five-minute relationship check-in. Your answers stay hidden until you've both finished.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#74305A">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='12' cy='16' r='9' fill='%231F6CB0'/%3E%3Ccircle cx='20' cy='16' r='9' fill='%23BB6A1C' fill-opacity='.85'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,500&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one calm column, one screen per step; results as paired-bar rows, one per area */
+:root {
+  --bg: #F4F2F6;
+  --surface: #FFFFFF;
+  --ink: #241C2C;
+  --muted: #675E72;
+  --line: #E1DBE7;
+  --accent: #74305A;
+  --accent-ink: #FFFFFF;
+  --pa: #1F6CB0;
+  --pb: #BB6A1C;
+  --good: #2E7A52;  --good-bg: #E3F2EA;
+  --warn: #8F5F0F;  --warn-bg: #FBF0DA;
+  --bad:  #A8353A;  --bad-bg:  #FBE6E6;
+  --gap:  #4E4A9A;  --gap-bg:  #E9E8F8;
+  --display: "Newsreader", Georgia, "Times New Roman", serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17131B; --surface: #211B27; --ink: #EFE9F3; --muted: #A99FB4; --line: #372E40;
+    --accent: #E09BC0; --accent-ink: #241C2C; --pa: #3F8CD4; --pb: #C97A2E;
+    --good: #7CCFA0; --good-bg: #1D3428; --warn: #E8BA5C; --warn-bg: #3A2E14;
+    --bad: #F08A8A; --bad-bg: #3D2023; --gap: #ABA8F0; --gap-bg: #29274A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17131B; --surface: #211B27; --ink: #EFE9F3; --muted: #A99FB4; --line: #372E40;
+  --accent: #E09BC0; --accent-ink: #241C2C; --pa: #3F8CD4; --pb: #C97A2E;
+  --good: #7CCFA0; --good-bg: #1D3428; --warn: #E8BA5C; --warn-bg: #3A2E14;
+  --bad: #F08A8A; --bad-bg: #3D2023; --gap: #ABA8F0; --gap-bg: #29274A;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+  margin: 0;
+}
+main { max-width: 720px; margin: 0 auto; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 500; text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(2rem, 6vw, 2.75rem); }
+h2 { font-size: clamp(1.5rem, 4.5vw, 1.9rem); }
+h3 { font-size: 1.25rem; }
+p { margin: 0; max-width: 62ch; }
+.muted { color: var(--muted); }
+.eyebrow { font-size: 0.75rem; letter-spacing: 0.09em; text-transform: uppercase; font-weight: 600; color: var(--muted); }
+.stack { display: grid; gap: 12px; }
+.stack-lg { display: grid; gap: 20px; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+button { font: inherit; cursor: pointer; border-radius: 999px; padding: 11px 20px; font-weight: 600; border: 1px solid transparent; }
+.btn { background: var(--accent); color: var(--accent-ink); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn-ghost:hover { border-color: var(--muted); }
+a.btn-ghost { display: inline-block; padding: 11px 20px; border-radius: 999px; font-weight: 600; text-decoration: none; border: 1px solid var(--line); }
+.site-foot { border-top: 1px solid var(--line); padding-top: 16px; }
+.link { background: none; border: 0; padding: 0; color: var(--muted); text-decoration: underline; font-weight: 500; border-radius: 4px; }
+
+label.field { display: grid; gap: 6px; font-weight: 600; font-size: 0.9rem; min-width: 0; flex: 1 1 200px; }
+input[type="text"] { font: inherit; font-weight: 400; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; }
+
+.areas { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 20px; }
+.areas li { display: grid; gap: 2px; min-width: 0; }
+.areas b { font-weight: 600; }
+.areas span { color: var(--muted); font-size: 0.9rem; }
+
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: 1px; margin-right: 6px; }
+.dot.a { background: var(--pa); } .dot.b { background: var(--pb); }
+
+/* Questionnaire */
+.progress { height: 6px; background: var(--line); border-radius: 999px; overflow: hidden; }
+.progress > i { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width .25s ease; }
+fieldset.q { border: 0; margin: 0; padding: 18px 0; border-top: 1px solid var(--line); display: grid; gap: 12px; min-width: 0; }
+fieldset.q:first-of-type { border-top: 0; padding-top: 0; }
+fieldset.q legend { padding: 0; font-weight: 500; font-size: 1.05rem; float: left; width: 100%; }
+.scale { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; clear: both; }
+.scale.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.scale input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.scale label { display: grid; gap: 2px; justify-items: center; text-align: center; padding: 10px 4px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; background: var(--bg); min-width: 0; }
+.scale label .n { font-weight: 700; font-variant-numeric: tabular-nums; }
+.scale label .l { font-size: 0.72rem; line-height: 1.2; color: var(--muted); }
+.scale label:hover { border-color: var(--muted); }
+.scale input:checked + label { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.scale input:checked + label .l { color: var(--accent-ink); }
+.scale input:focus-visible + label { outline: 3px solid var(--accent); outline-offset: 2px; }
+.navrow { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+/* Results */
+.banner { background: var(--gap-bg); color: var(--ink); border-radius: 12px; padding: 12px 16px; font-size: 0.95rem; }
+.scores { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.score { display: grid; gap: 4px; }
+.score .big { font-family: var(--display); font-size: 3rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.score .big small { font-size: 1.1rem; color: var(--muted); font-family: var(--body); }
+.score.a { border-top: 4px solid var(--pa); } .score.b { border-top: 4px solid var(--pb); }
+
+.pill { display: inline-block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.pill.strength { color: var(--good); background: var(--good-bg); }
+.pill.steady { color: var(--warn); background: var(--warn-bg); }
+.pill.work { color: var(--bad); background: var(--bad-bg); }
+.pill.gap { color: var(--gap); background: var(--gap-bg); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.9rem; color: var(--muted); }
+.domain { display: grid; gap: 8px; padding: 14px 0; border-top: 1px solid var(--line); }
+.domain:first-of-type { border-top: 0; }
+.domain-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.domain-head h3 { font-size: 1.1rem; }
+.bar { display: grid; grid-template-columns: minmax(0, 1fr) 2.6rem; gap: 10px; align-items: center; }
+.track { position: relative; height: 12px; background: var(--bg); border-radius: 999px; }
+.track .fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; }
+.track .fill.a { background: var(--pa); } .track .fill.b { background: var(--pb); }
+.track .mark { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--muted); opacity: 0.45; }
+.bar .val { font-variant-numeric: tabular-nums; font-weight: 600; text-align: right; }
+.axis { position: relative; height: 16px; margin-right: calc(2.6rem + 10px); font-size: 0.7rem; color: var(--muted); }
+.axis span { position: absolute; transform: translateX(-50%); }
+.note { font-size: 0.9rem; color: var(--muted); }
+
+.priority { display: grid; gap: 6px; padding: 16px 0; border-top: 1px solid var(--line); }
+.priority:first-of-type { border-top: 0; padding-top: 4px; }
+.talk { display: grid; gap: 8px; padding: 14px 0; border-top: 1px solid var(--line); }
+.talk:first-of-type { border-top: 0; padding-top: 4px; }
+.talk .answers { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.9rem; }
+.support { border-color: var(--bad); }
+.support ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.phone { font-variant-numeric: tabular-nums; font-weight: 700; user-select: all; }
+.fine { font-size: 0.82rem; color: var(--muted); }
+.linkbox { display: grid; gap: 10px; min-width: 0; }
+.link-text { display: block; overflow-wrap: anywhere; font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 0.82rem; line-height: 1.45; background: var(--bg); padding: 12px; border-radius: 10px; border: 1px solid var(--line); user-select: all; }
+.modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.mode { display: grid; gap: 8px; align-content: start; justify-items: start; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); min-width: 0; }
+.mode h3 { font-size: 1.15rem; }
+.error { color: var(--bad); font-size: 0.9rem; }
+.teaser { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
+.teaser .stack { flex: 1 1 260px; min-width: 0; }
+.change-overall { display: flex; flex-wrap: wrap; gap: 6px 22px; font-variant-numeric: tabular-nums; }
+.delta { color: var(--muted); font-size: 0.9rem; }
+.move { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line); }
+.move:first-child { border-top: 0; }
+.move-name { font-weight: 600; min-width: 0; }
+.move-vals { display: flex; gap: 14px; font-variant-numeric: tabular-nums; font-size: 0.92rem; }
+.pill.up { color: var(--good); background: var(--good-bg); }
+.pill.down { color: var(--bad); background: var(--bad-bg); }
+.pill.mixed { color: var(--gap); background: var(--gap-bg); }
+.chart { width: 100%; height: auto; display: block; overflow: visible; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .grid.cut { stroke-dasharray: 3 4; stroke: var(--muted); opacity: 0.5; }
+.chart .axis-t { fill: var(--muted); font-size: 10px; font-family: var(--body); font-variant-numeric: tabular-nums; }
+.chart .end-t { fill: var(--ink); font-size: 11px; font-weight: 600; font-family: var(--body); font-variant-numeric: tabular-nums; }
+.chart .ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .ln.a { stroke: var(--pa); } .chart .ln.b { stroke: var(--pb); }
+.chart .pt { stroke: var(--surface); stroke-width: 2; }
+.chart .pt.a { fill: var(--pa); } .chart .pt.b { fill: var(--pb); }
+.chart.overall { max-width: 560px; }
+.chart .hit { fill: transparent; }
+.chart .hit:hover { fill: var(--line); fill-opacity: 0.35; }
+.minis { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px 24px; }
+.mini { display: grid; gap: 6px; min-width: 0; }
+.mini h3 { font-size: 1.05rem; }
+.table-wrap { overflow-x: auto; }
+table.hist { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+table.hist th, table.hist td { text-align: left; padding: 9px 8px; border-top: 1px solid var(--line); white-space: nowrap; }
+table.hist thead th { border-top: 0; font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+table.hist .num { text-align: right; }
+table.hist .acts { text-align: right; }
+.link.danger { color: var(--bad); }
+@media (prefers-reduced-motion: reduce) { .progress > i { transition: none; } }
+</style>
+</head>
+<body>
+
+<main id="app" aria-live="polite"></main>
+
+<script>
+const SCALE = [
+  { v: 1, l: "Strongly disagree" }, { v: 2, l: "Disagree" }, { v: 3, l: "Mixed" },
+  { v: 4, l: "Agree" }, { v: 5, l: "Strongly agree" }
+];
+
+// r: true = reverse-scored (agreeing is a warning sign)
+const DOMAINS = [
+  { id: "know", name: "Knowing each other", blurb: "Curiosity about each other's inner world",
+    tip: "For a week, each ask one open question a day that isn't about logistics: “What's on your mind about work at the moment?”, “What are you looking forward to?”",
+    items: [
+      { id: "know1", t: "I know what's currently worrying or stressing my partner." },
+      { id: "know2", t: "My partner knows my hopes and goals for the next few years." },
+      { id: "know3", t: "We still talk about things other than logistics, kids or chores." },
+      { id: "know4", t: "Lately it feels like we're living parallel lives.", r: true }
+    ] },
+  { id: "appr", name: "Appreciation", blurb: "Feeling valued and liked",
+    tip: "Each evening this week, name one specific thing your partner did that you valued. Specific beats general: “Thanks for handling the school call” lands better than “thanks for everything”.",
+    items: [
+      { id: "appr1", t: "I regularly feel appreciated by my partner." },
+      { id: "appr2", t: "I often tell my partner what I admire or value about them." },
+      { id: "appr3", t: "My partner shows affection in ways that land for me." },
+      { id: "appr4", t: "I feel taken for granted.", r: true }
+    ] },
+  { id: "resp", name: "Being there", blurb: "Responding when the other reaches out",
+    tip: "Agree a 10-minute daily check-in with phones away. Notice small bids for attention (a comment, a sigh, a shared link) and respond to them.",
+    items: [
+      { id: "resp1", t: "When I reach out for attention or connection, my partner usually responds." },
+      { id: "resp2", t: "My partner is there for me when I'm having a hard time." },
+      { id: "resp3", t: "We make time for each other, even in busy weeks." },
+      { id: "resp4", t: "I often feel ignored or brushed off by my partner.", r: true }
+    ] },
+  { id: "conf", name: "Handling conflict", blurb: "How disagreements start and run",
+    tip: "Raise issues as “I feel … about … and I need …” rather than “You always …”. Pick one recurring disagreement and each explain the other's side until they agree you've got it right.",
+    items: [
+      { id: "conf1", t: "We can raise a problem without it turning into an attack." },
+      { id: "conf2", t: "I feel heard when we disagree, even if we don't end up agreeing." },
+      { id: "conf3", t: "Our arguments often involve criticism, sarcasm or eye-rolling.", r: true },
+      { id: "conf4", t: "One of us often shuts down or walks away mid-disagreement.", r: true }
+    ] },
+  { id: "repr", name: "Repair", blurb: "Getting back on track after a rupture",
+    tip: "Agree a phrase either of you can use to pause an argument, and a rule that you come back to it after at least 20 minutes, once you've both calmed down.",
+    items: [
+      { id: "repr1", t: "After an argument we find our way back to each other fairly quickly." },
+      { id: "repr2", t: "When one of us tries to calm things down mid-argument, the other accepts it." },
+      { id: "repr3", t: "We can apologise to each other and mean it." },
+      { id: "repr4", t: "Old hurts keep resurfacing because they never got resolved.", r: true }
+    ] },
+  { id: "trst", name: "Trust and commitment", blurb: "Feeling secure in each other",
+    tip: "Talk about what would help each of you feel more secure. If trust has been broken (an affair, hidden money, lies), this is the area where a couples counsellor helps most.",
+    items: [
+      { id: "trst1", t: "I trust my partner to act in my best interests." },
+      { id: "trst2", t: "I feel secure in our commitment to each other." },
+      { id: "trst3", t: "My partner is honest with me, including about difficult things." },
+      { id: "trst4", t: "I sometimes wonder whether I'd be better off out of this relationship.", r: true }
+    ] },
+  { id: "intm", name: "Intimacy", blurb: "Physical closeness and sex",
+    tip: "Each privately write three things that help you feel close, physical or not, then swap lists. Talk about one item from each list, without negotiating yet.",
+    items: [
+      { id: "intm1", t: "I'm satisfied with the physical affection between us." },
+      { id: "intm2", t: "I'm satisfied with our sex life, or with the level of intimacy we've agreed on." },
+      { id: "intm3", t: "We can talk openly about what each of us wants in intimacy." },
+      { id: "intm4", t: "Physical closeness has become rare or feels like a chore.", r: true }
+    ] },
+  { id: "team", name: "Teamwork", blurb: "Sharing the load and the direction",
+    tip: "Together, list every recurring task (including the remembering and planning) and who owns it. Rebalance the two that feel most unfair.",
+    items: [
+      { id: "team1", t: "The household work and mental load feel fairly shared." },
+      { id: "team2", t: "We make big decisions (money, family, where we live) together." },
+      { id: "team3", t: "We have a shared picture of where our life is heading." },
+      { id: "team4", t: "Stress from money, family or work regularly spills into how we treat each other.", r: true }
+    ] }
+];
+
+const SAFETY = [
+  { id: "safe1", t: "I feel safe with my partner, physically and emotionally.",
+    opts: [["yes", "Yes"], ["notalways", "Not always"], ["no", "No"]], flag: ["notalways", "no"] },
+  { id: "safe2", t: "I feel afraid of my partner, or controlled by them (money, phone, who I see, where I go).",
+    opts: [["no", "No"], ["sometimes", "Sometimes"], ["yes", "Yes"]], flag: ["sometimes", "yes"] }
+];
+
+const STRONG = 75, STEADY = 55, GAP = 20;
+const ITEMS = DOMAINS.flatMap(d => d.items.map(i => ({ ...i, domain: d })));
+const STORE = "both-sides-checkin-v2";
+
+const HIST_STORE = "both-sides-checkin-history-v1";
+const CHANGE = 13;   // two answer steps in one area; smaller moves are noise
+const CADENCE = 28;  // suggested days between check-ins
+
+// Made-up couple for the sample report: three monthly check-ins, oldest first.
+const SAMPLE = {
+  names: { a: "Sam", b: "Jordan" },
+  checkins: [
+    { date: "2026-07-19", a: { know: [3,3,3,3], appr: [2,3,2,4], resp: [3,3,2,3], conf: [2,2,4,4], repr: [3,3,4,3], trst: [5,4,4,2], intm: [2,2,2,4], team: [3,4,3,4] },
+                          b: { know: [3,3,3,3], appr: [2,2,2,4], resp: [4,3,2,3], conf: [2,3,4,4], repr: [4,3,4,3], trst: [5,5,4,1], intm: [4,4,3,2], team: [2,3,4,4] } },
+    { date: "2026-08-23", a: { know: [4,3,3,3], appr: [3,3,3,3], resp: [4,4,3,2], conf: [2,3,4,4], repr: [4,4,4,3], trst: [5,5,4,1], intm: [2,2,3,4], team: [3,4,4,3] },
+                          b: { know: [4,3,3,2], appr: [2,3,2,3], resp: [4,3,2,2], conf: [3,3,4,4], repr: [4,4,4,2], trst: [5,5,5,1], intm: [4,4,4,2], team: [2,4,4,3] } },
+    { date: "2026-09-27", a: { know: [4,4,3,2], appr: [3,4,3,3], resp: [4,4,3,2], conf: [2,3,4,4], repr: [4,4,4,2], trst: [5,5,4,1], intm: [2,2,3,4], team: [4,4,4,3] },
+                          b: { know: [4,3,3,2], appr: [2,3,2,4], resp: [4,4,2,2], conf: [3,3,3,4], repr: [4,4,5,2], trst: [5,5,5,1], intm: [4,4,4,2], team: [2,4,4,3] } }
+  ]
+};
+
+const SITE_URL = location.origin + location.pathname;
+const PAPER_PDF = "both-sides-checkin-paper.pdf";
+
+let state = fresh();
+let saved = [];          // this device's finished check-ins: { day, A, B } (person codes)
+let sampleHistory = null;  // in memory only, while the sample is open
+// Safety answers live only in memory and are never saved, encoded in a link, or shown in a report.
+let safety = { a: {}, b: {} };
+let view = null;           // overlay on top of the current stage: { kind: "progress", group } or { kind: "report", entry }
+let confirmReset = false;
+let confirmRemove = null;
+let confirmClearHistory = false;
+let pasteError = "";
+
+function fresh() {
+  return { mode: "two", stage: "intro", who: "a", step: 0, names: { a: "", b: "" }, answers: { a: {}, b: {} } };
+}
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STORE) || "null");
+    if (s && s.answers) state = { ...fresh(), ...s };
+    // Someone who reloads on the private support screen has already seen it.
+    if (state.stage === "support") afterPartner(false);
+  } catch (e) {}
+  try {
+    const h = JSON.parse(localStorage.getItem(HIST_STORE) || "[]");
+    if (Array.isArray(h)) saved = h.filter(e => e && Number.isFinite(e.day) && decodePerson(e.A) && decodePerson(e.B));
+  } catch (e) {}
+}
+function save() {
+  if (state.sample) return;
+  try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {}
+}
+function saveHistory() {
+  try { localStorage.setItem(HIST_STORE, JSON.stringify(saved)); } catch (e) {}
+}
+function clearHash() {
+  try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+}
+// Start the next check-in: keep names and the history, drop the current answers.
+function newCheckin() {
+  const keep = state.fromLink || state.mode === "one" ? { a: state.names.a, b: state.names.b }
+    : { a: state.names[state.who], b: state.names[other(state.who)] };
+  state = { ...fresh(), names: keep };
+  safety = { a: {}, b: {} }; confirmReset = false; pasteError = ""; view = null;
+  clearHash();
+  go();
+}
+// Leave no trace on this device (used from the private safety screen).
+function wipeAll() {
+  state = fresh(); saved = []; safety = { a: {}, b: {} }; confirmReset = false; pasteError = ""; view = null;
+  try { localStorage.removeItem(STORE); localStorage.removeItem(HIST_STORE); } catch (e) {}
+  clearHash();
+  go();
+}
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const nm = w => esc(state.names[w] || (state.mode === "two" && w !== state.who ? "your partner" : (w === "a" ? "Partner 1" : "Partner 2")));
+const other = w => (w === "a" ? "b" : "a");
+const hasAll = ans => ITEMS.every(i => ans && ans[i.id] >= 1 && ans[i.id] <= 5);
+
+/* ---------- Dates (whole days since 1 Jan 2024, local calendar) ---------- */
+const EPOCH = Date.UTC(2024, 0, 1);
+function todayDay() { const t = new Date(); return Math.round((Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) - EPOCH) / 864e5); }
+function isoToDay(s) { const [y, m, d] = s.split("-").map(Number); return Math.round((Date.UTC(y, m - 1, d) - EPOCH) / 864e5); }
+function fmtDay(day, opts = { day: "numeric", month: "short", year: "numeric" }) {
+  return new Date(EPOCH + day * 864e5).toLocaleDateString(undefined, { ...opts, timeZone: "UTC" });
+}
+const shortDay = day => fmtDay(day, { day: "numeric", month: "short" });
+
+/* ---------- Link codes ----------
+   A person's code packs their 32 answers (base 5) and name into link-safe base32:
+   "1" (format version) + 15 answer chars + "." + name + "." + 2-char checksum.
+   Links: #p-<person>  (one partner's answers)
+          #r-<A>-<B>-<day>  (one check-in's results)
+          #h-<day>-<A>-<B>_<day>-<A>-<B>...  (a couple's history) */
+const B32 = "0123456789abcdefghijklmnopqrstuv";
+function bigToB32(n, len) { let s = ""; for (let k = 0; k < len; k++) { s = B32[Number(n & 31n)] + s; n >>= 5n; } return s; }
+function b32ToBig(s) { let n = 0n; for (const c of s) { const v = B32.indexOf(c); if (v < 0) throw new Error("bad"); n = n * 32n + BigInt(v); } return n; }
+function bytesToB32(bytes) {
+  let bits = 0, val = 0, out = "";
+  for (const b of bytes) { val = (val << 8) | b; bits += 8; while (bits >= 5) { out += B32[(val >> (bits - 5)) & 31]; bits -= 5; } val &= (1 << bits) - 1; }
+  if (bits > 0) out += B32[(val << (5 - bits)) & 31];
+  return out;
+}
+function b32ToBytes(s) {
+  let bits = 0, val = 0; const out = [];
+  for (const c of s) { const v = B32.indexOf(c); if (v < 0) throw new Error("bad"); val = (val << 5) | v; bits += 5; if (bits >= 8) { out.push((val >> (bits - 8)) & 255); bits -= 8; } val &= (1 << bits) - 1; }
+  return new Uint8Array(out);
+}
+function checksum(s) { let h = 7; for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 1021; return bigToB32(BigInt(h), 2); }
+function encodePerson(name, ans) {
+  let n = 0n;
+  for (const it of ITEMS) n = n * 5n + BigInt(ans[it.id] - 1);
+  const body = "1" + bigToB32(n, 15) + "." + bytesToB32(new TextEncoder().encode((name || "").slice(0, 40)));
+  return body + "." + checksum(body);
+}
+const decoded = new Map();
+function decodePerson(code) {
+  if (decoded.has(code)) return decoded.get(code);
+  const parts = String(code).split(".");
+  let out = null;
+  if (parts.length === 3) {
+    const [head, name, sum] = parts;
+    if (head.length === 16 && head[0] === "1" && checksum(head + "." + name) === sum) {
+      try {
+        let n = b32ToBig(head.slice(1));
+        const vals = [];
+        for (let k = 0; k < ITEMS.length; k++) { vals.unshift(Number(n % 5n) + 1); n /= 5n; }
+        const answers = {};
+        ITEMS.forEach((it, k) => { answers[it.id] = vals[k]; });
+        out = { name: new TextDecoder().decode(b32ToBytes(name)), answers, code };
+      } catch (e) { out = null; }
+    }
+  }
+  decoded.set(code, out);
+  return out;
+}
+const dayCode = d => bigToB32(BigInt(d), 3);
+function parseDay(s) { try { return s && s.length === 3 ? Number(b32ToBig(s)) : null; } catch (e) { return null; } }
+function parseShared(text) {
+  let s = String(text || "").trim().toLowerCase();
+  const h = s.indexOf("#");
+  if (h >= 0) s = s.slice(h + 1);
+  s = s.replace(/\s+/g, "");
+  if (s.startsWith("h-")) {
+    const entries = s.slice(2).split("_").map(part => {
+      const [d, a, b] = part.split("-");
+      const day = parseDay(d);
+      return day !== null && decodePerson(a || "") && decodePerson(b || "") ? { day, A: a, B: b } : null;
+    });
+    return entries.length && entries.every(Boolean) ? { type: "h", entries } : null;
+  }
+  if (s.startsWith("r-")) {
+    const [, a, b, d] = s.split("-");
+    const A = decodePerson(a || ""), B = decodePerson(b || "");
+    return A && B ? { type: "r", A, B, day: parseDay(d) } : null;
+  }
+  if (s.startsWith("p-")) s = s.slice(2);
+  const P = decodePerson(s);
+  return P ? { type: "p", P } : null;
+}
+const myCode = () => (hasAll(state.answers[state.who]) ? encodePerson(state.names[state.who], state.answers[state.who]) : null);
+const personLink = () => `${SITE_URL}#p-${myCode()}`;
+const resultsLink = () => `${SITE_URL}#r-${encodePerson(state.names.a, state.answers.a)}-${encodePerson(state.names.b, state.answers.b)}-${dayCode(state.day ?? todayDay())}`;
+const historyLink = entries => `${SITE_URL}#h-${entries.map(e => `${dayCode(e.day)}-${e.A}-${e.B}`).join("_")}`;
+
+// Apply a link or pasted code. Returns true when the state changed.
+function applyShared(r) {
+  if (r.type === "h") {
+    r.entries.forEach(addToHistory);
+    view = { kind: "progress", group: pairKey(r.entries[r.entries.length - 1]) };
+    return true;
+  }
+  if (r.type === "r") {
+    state = { ...fresh(), stage: "results", names: { a: r.A.name, b: r.B.name }, answers: { a: r.A.answers, b: r.B.answers }, day: r.day ?? todayDay(), fromLink: true };
+    view = null;
+    return true;
+  }
+  const P = r.P;
+  const mine = myCode();
+  if (state.mode === "two" && mine && mine === P.code) { state.notice = "own"; return true; }
+  // The partner link this device already holds (e.g. a reload): keep where we are.
+  const them = other(state.who);
+  if (state.mode === "two" && hasAll(state.answers[them]) && encodePerson(state.names[them], state.answers[them]) === P.code) return false;
+  view = null;
+  const started = state.mode === "two" && ["quiz", "support", "share", "invited"].includes(state.stage);
+  if (started) {
+    state.names[them] = P.name; state.answers[them] = P.answers; state.notice = "";
+    if (state.stage === "share") state.stage = "results";
+    return true;
+  }
+  // A new check-in from the partner. Keep this person's name from last time.
+  const myName = state.fromLink ? "" : (state.mode === "two" ? state.names[state.who] : "");
+  state = { ...fresh(), who: "b", stage: "invited", names: { a: P.name, b: myName || "" }, answers: { a: P.answers, b: {} } };
+  return true;
+}
+function handleHash() {
+  const h = location.hash.slice(1);
+  if (!h) return false;
+  const r = parseShared(h);
+  return r ? applyShared(r) : false;
+}
+
+/* ---------- History ---------- */
+const normName = s => (s || "").trim().toLowerCase();
+const entryKey = e => `${e.day}-${e.A}-${e.B}`;
+function pairKey(e) { return [decodePerson(e.A).name, decodePerson(e.B).name].map(normName).sort().join("|"); }
+function addToHistory(e) {
+  // The same answers arriving again within a week (a pasted code, then the results link) is one check-in.
+  const same = x => ((x.A === e.A && x.B === e.B) || (x.A === e.B && x.B === e.A)) && Math.abs(x.day - e.day) <= 7;
+  if (saved.some(same)) return;
+  saved.push({ day: e.day, A: e.A, B: e.B });
+  saved.sort((x, y) => x.day - y.day);
+  saveHistory();
+}
+// Record the check-in on screen, once, the first time its results are shown.
+function recordResults() {
+  if (state.sample || state.stage !== "results" || !hasAll(state.answers.a) || !hasAll(state.answers.b)) return;
+  if (state.day == null) state.day = todayDay();
+  addToHistory({ day: state.day, A: encodePerson(state.names.a, state.answers.a), B: encodePerson(state.names.b, state.answers.b) });
+}
+const activeHistory = () => sampleHistory || saved;
+function groups() {
+  const map = new Map();
+  activeHistory().forEach(e => { const k = pairKey(e); if (!map.has(k)) map.set(k, []); map.get(k).push(e); });
+  return [...map.entries()].map(([key, entries]) => ({ key, entries }))
+    .sort((x, y) => y.entries[y.entries.length - 1].day - x.entries[x.entries.length - 1].day);
+}
+const groupFor = key => groups().find(g => g.key === key) || null;
+
+// Line one couple's check-ins up so person X is always the same person, named as in the latest check-in.
+function series(entries) {
+  const last = entries[entries.length - 1];
+  const lx = decodePerson(last.A).name, ly = decodePerson(last.B).name;
+  const points = entries.map(e => {
+    let A = decodePerson(e.A), B = decodePerson(e.B);
+    if (normName(lx) !== normName(ly) && normName(A.name) === normName(ly) && normName(B.name) === normName(lx)) [A, B] = [B, A];
+    const R = analyse({ a: A.answers, b: B.answers });
+    return { e, day: e.day, a: R.overall.a, b: R.overall.b, rows: R.rows };
+  });
+  return { names: { a: lx, b: ly }, points };
+}
+
+/* ---------- Scoring ---------- */
+const adj = (item, v) => (item.r ? 6 - v : v);
+function domainScore(d, ans) {
+  const vals = d.items.map(i => adj(i, ans[i.id]));
+  return Math.round(((vals.reduce((s, x) => s + x, 0) / vals.length) - 1) / 4 * 100);
+}
+const bandLabel = { strength: "Strength", steady: "Steady", work: "Needs work", gap: "Seen differently" };
+const overallLine = s => (s >= STRONG ? "feels the relationship is in good shape" : s >= STEADY ? "feels the relationship is mostly steady, with some strain" : "feels the relationship is under real strain");
+
+function analyse(answers) {
+  const rows = DOMAINS.map(d => {
+    const a = domainScore(d, answers.a), b = domainScore(d, answers.b);
+    const lo = Math.min(a, b), gap = Math.abs(a - b);
+    const status = lo < STEADY ? "work" : gap >= GAP ? "gap" : (a >= STRONG && b >= STRONG) ? "strength" : "steady";
+    return { d, a, b, lo, gap, status };
+  });
+  const overall = {
+    a: Math.round(rows.reduce((s, r) => s + r.a, 0) / rows.length),
+    b: Math.round(rows.reduce((s, r) => s + r.b, 0) / rows.length)
+  };
+  const priorities = rows.filter(r => r.status === "work" || r.status === "gap")
+    .sort((x, y) => x.lo - y.lo || y.gap - x.gap).slice(0, 3);
+  const strengths = rows.filter(r => r.status === "strength");
+  const talks = ITEMS.map(i => {
+    const ra = answers.a[i.id], rb = answers.b[i.id];
+    return { i, ra, rb, diff: Math.abs(adj(i, ra) - adj(i, rb)) };
+  }).filter(x => x.diff >= 2).sort((x, y) => y.diff - x.diff).slice(0, 6);
+  return { rows, overall, priorities, strengths, talks };
+}
+
+/* ---------- Change since last time ---------- */
+const signed = n => (n > 0 ? `+${n}` : n < 0 ? `−${Math.abs(n)}` : "±0");
+const meanGap = p => Math.round(p.rows.reduce((s, r) => s + r.gap, 0) / p.rows.length);
+function vChange(prev, cur, names) {
+  const X = esc(names.a || "Partner 1"), Y = esc(names.b || "Partner 2");
+  const moves = cur.rows.map((r, k) => ({ d: r.d, da: r.a - prev.rows[k].a, db: r.b - prev.rows[k].b }))
+    .filter(m => Math.abs(m.da) >= CHANGE || Math.abs(m.db) >= CHANGE)
+    .sort((x, y) => (Math.abs(y.da) + Math.abs(y.db)) - (Math.abs(x.da) + Math.abs(x.db)));
+  const kind = m => (m.da >= 0 && m.db >= 0 ? "up" : m.da <= 0 && m.db <= 0 ? "down" : "mixed");
+  const kindLabel = { up: "Better", down: "Worse", mixed: "Mixed" };
+  const g0 = meanGap(prev), g1 = meanGap(cur);
+  const gapLine = g1 <= g0 - 3 ? `You see things more alike than last time (average gap ${g0} → ${g1} points).`
+    : g1 >= g0 + 3 ? `You see things less alike than last time (average gap ${g0} → ${g1} points).`
+    : `You see things about as alike as last time (average gap ${g1} points).`;
+  return `
+    <div class="change-overall">
+      <span><span class="dot a"></span>${X}: ${prev.a} → <b>${cur.a}</b> <span class="delta">${signed(cur.a - prev.a)}</span></span>
+      <span><span class="dot b"></span>${Y}: ${prev.b} → <b>${cur.b}</b> <span class="delta">${signed(cur.b - prev.b)}</span></span>
+    </div>
+    <p class="note">${gapLine}</p>
+    ${moves.length ? `<div>${moves.map(m => `<div class="move">
+        <span class="move-name">${m.d.name}</span>
+        <span class="move-vals"><span><span class="dot a"></span>${signed(m.da)}</span><span><span class="dot b"></span>${signed(m.db)}</span></span>
+        <span class="pill ${kind(m)}">${kindLabel[kind(m)]}</span>
+      </div>`).join("")}</div>`
+      : `<p class="note">No area moved by ${CHANGE} points or more for either of you.</p>`}
+    <p class="fine">Only moves of ${CHANGE}+ points are listed. One answer moving one step shifts an area by about 6 points, so smaller changes are mostly noise.</p>`;
+}
+
+/* ---------- Charts ---------- */
+// One couple over time: two lines on one 0–100 scale, band lines at the cut-offs.
+function lineChart(points, pick, { w, h, mini, title }) {
+  const padL = mini ? 24 : 30, padR = mini ? 30 : 36, padT = 10, padB = mini ? 10 : 26;
+  const d0 = points[0].day, d1 = points[points.length - 1].day;
+  const X = (p, i) => padL + (d1 > d0 ? (p.day - d0) / (d1 - d0) : points.length > 1 ? i / (points.length - 1) : 0.5) * (w - padL - padR);
+  const Y = v => padT + (1 - v / 100) * (h - padT - padB);
+  const grid = [0, STEADY, STRONG, 100].map(v => `<line class="grid${v === STEADY || v === STRONG ? " cut" : ""}" x1="${padL}" x2="${w - padR}" y1="${Y(v)}" y2="${Y(v)}"></line>
+      <text class="axis-t" x="${padL - 5}" y="${Y(v) + 3.5}" text-anchor="end">${v}</text>`).join("");
+  const line = s => `<polyline class="ln ${s}" points="${points.map((p, i) => `${X(p, i).toFixed(1)},${Y(pick(p, s)).toFixed(1)}`).join(" ")}"></polyline>`;
+  const dots = s => points.map((p, i) => `<circle class="pt ${s}" cx="${X(p, i).toFixed(1)}" cy="${Y(pick(p, s)).toFixed(1)}" r="${i === points.length - 1 ? 4.5 : 3.5}"></circle>`).join("");
+  const li = points.length - 1, lp = points[li];
+  let ya = Y(pick(lp, "a")) + 4, yb = Y(pick(lp, "b")) + 4;
+  if (Math.abs(ya - yb) < 12) { const m = (ya + yb) / 2, up = pick(lp, "a") >= pick(lp, "b"); ya = m + (up ? -6 : 6); yb = m + (up ? 6 : -6); }
+  const ends = `<text class="end-t" x="${X(lp, li) + 8}" y="${ya}">${pick(lp, "a")}</text><text class="end-t" x="${X(lp, li) + 8}" y="${yb}">${pick(lp, "b")}</text>`;
+  const xlab = mini ? "" : points.map((p, i) => (i === 0 || i === li || points.length <= 4)
+    ? `<text class="axis-t" x="${X(p, i)}" y="${h - 8}" text-anchor="${i === 0 && points.length > 1 ? "start" : i === li && points.length > 1 ? "end" : "middle"}">${shortDay(p.day)}</text>` : "").join("");
+  // Hover targets: one column per check-in, wider than the dots.
+  const colW = points.length > 1 ? Math.max(14, (w - padL - padR) / (points.length - 1)) : 40;
+  const hits = points.map((p, i) => `<rect class="hit" x="${X(p, i) - colW / 2}" y="${padT}" width="${colW}" height="${h - padT - padB}"><title>${fmtDay(p.day)}: ${esc(title.a)} ${pick(p, "a")}, ${esc(title.b)} ${pick(p, "b")}</title></rect>`).join("");
+  return `<svg class="chart${mini ? "" : " overall"}" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(title.label)}">${grid}${line("a")}${line("b")}${dots("a")}${dots("b")}${ends}${xlab}${hits}</svg>`;
+}
+
+/* ---------- Screens ---------- */
+const linkBox = (id, link) => `<div class="linkbox">
+    <code class="link-text" id="${id}">${esc(link)}</code>
+    <div class="row"><button class="btn" data-act="copy" data-target="${id}">Copy link</button><span class="fine" id="${id}-status" role="status"></span></div>
+  </div>`;
+
+function vHistoryTeaser() {
+  const g = groups()[0];
+  if (!g) return "";
+  const s = series(g.entries), last = s.points[s.points.length - 1];
+  const since = todayDay() - last.day;
+  const due = since >= CADENCE;
+  return `<section class="panel teaser">
+    <div class="stack">
+      <span class="eyebrow">${g.entries.length} check-in${g.entries.length > 1 ? "s" : ""} on this phone</span>
+      <p><b>${esc(s.names.a || "Partner 1")} and ${esc(s.names.b || "Partner 2")}</b>: last check-in ${fmtDay(last.day)}${since > 0 ? `, ${since} day${since > 1 ? "s" : ""} ago` : ", today"}. ${due ? "Time for another one." : `Next one suggested around ${fmtDay(last.day + CADENCE)}.`}</p>
+    </div>
+    <button class="btn-ghost" data-act="progress" data-group="${esc(g.key)}">See your progress</button>
+  </section>`;
+}
+
+function vIntro() {
+  return `
+  <header class="stack">
+    <span class="eyebrow">Relationship check-in · two perspectives</span>
+    <h1>How is it going, from both sides?</h1>
+    <p class="muted">Each of you answers 32 short statements on your own, in about five minutes. The check-in then shows how each of you sees the relationship, where you agree, where you see it differently, and what to work on first. Repeat it every month or so to see what's changing.</p>
+  </header>
+  ${vHistoryTeaser()}
+  <section class="panel stack-lg">
+    <div class="row">
+      <label class="field" for="name-a"><span>Your name</span>
+        <input type="text" id="name-a" data-name="a" value="${esc(state.names.a)}" placeholder="e.g. Alex" autocomplete="off" maxlength="40"></label>
+      <label class="field" for="name-b"><span>Your partner's name</span>
+        <input type="text" id="name-b" data-name="b" value="${esc(state.names.b)}" placeholder="e.g. Sam" autocomplete="off" maxlength="40"></label>
+    </div>
+    <p class="fine">Use the same names each time so your check-ins line up in your progress.</p>
+    <div class="modes">
+      <div class="mode">
+        <h3>On our own phones</h3>
+        <p class="note">You answer here, then send your partner a link. Your answers stay hidden from them until they've finished too.</p>
+        <button class="btn" data-act="start-two">Start on my phone</button>
+      </div>
+      <div class="mode">
+        <h3>On one shared phone</h3>
+        <p class="note">You answer, then hand the phone over. Best when you're sitting together.</p>
+        <button class="btn-ghost" data-act="start-one">Start on this phone</button>
+      </div>
+    </div>
+    <p class="fine">At the end you'll both see each other's scores and any statements you answered very differently. A short private safety question for each of you is never shown to the other person.</p>
+  </section>
+  <div class="row">
+    <button class="btn-ghost" data-act="sample">See a sample report</button>
+    <a class="btn-ghost" href="${PAPER_PDF}" download>Download the paper version (PDF)</a>
+  </div>
+  <section class="stack">
+    <h2>What it covers</h2>
+    <ul class="areas">
+      ${DOMAINS.map(d => `<li><b>${d.name}</b><span>${d.blurb}</span></li>`).join("")}
+    </ul>
+  </section>
+  <footer class="site-foot stack">
+    <p class="fine">This is a conversation starter, not a clinical assessment or a substitute for counselling. Scores and cut-offs are provisional.</p>
+    <p class="fine">Privacy: this site has no database and never receives your answers. They stay on your phone and inside the links you choose to send, in the part of the link that browsers don't send to the website.</p>
+  </footer>`;
+}
+
+function vInvited() {
+  return `
+  <header class="stack">
+    <span class="eyebrow">Relationship check-in · your turn</span>
+    <h1 tabindex="-1">${nm("a")} has done their half</h1>
+    <p class="muted">Now answer 32 short statements on your own, in about five minutes. ${nm("a")}'s answers stay hidden until you've finished. Then you'll both see how each of you sees the relationship and what to work on first.</p>
+  </header>
+  <section class="panel stack-lg">
+    <label class="field" for="name-self"><span>Your name</span>
+      <input type="text" id="name-self" data-name="b" value="${esc(state.names.b)}" placeholder="e.g. Sam" autocomplete="off" maxlength="40"></label>
+    <div class="row"><button class="btn" data-act="start-invited">Start my answers</button></div>
+    <p class="fine">There's a short private safety question at the end that ${nm("a")} will never see. This is a conversation starter, not a clinical assessment.</p>
+  </section>`;
+}
+
+function vQuiz() {
+  const w = state.who, step = state.step, total = DOMAINS.length + 1;
+  const isSafety = step === DOMAINS.length;
+  const pct = Math.round((step / total) * 100);
+  let body, title, sub;
+  if (!isSafety) {
+    const d = DOMAINS[step];
+    title = d.name; sub = d.blurb;
+    body = d.items.map(i => {
+      const cur = state.answers[w][i.id];
+      return `<fieldset class="q"><legend>${esc(i.t)}</legend><div class="scale">
+        ${SCALE.map(s => `<input type="radio" id="${w}-${i.id}-${s.v}" name="${w}-${i.id}" value="${s.v}" data-item="${i.id}" ${cur === s.v ? "checked" : ""}>
+          <label for="${w}-${i.id}-${s.v}"><span class="n">${s.v}</span><span class="l">${s.l}</span></label>`).join("")}
+      </div></fieldset>`;
+    }).join("");
+  } else {
+    title = "Just for you"; sub = "These two answers stay private. They are not saved, not included in any link, and never appear in a report.";
+    body = SAFETY.map(q => {
+      const cur = safety[w][q.id];
+      return `<fieldset class="q"><legend>${esc(q.t)}</legend><div class="scale three">
+        ${q.opts.map(([v, l]) => `<input type="radio" id="${w}-${q.id}-${v}" name="${w}-${q.id}" value="${v}" data-safe="${q.id}" ${cur === v ? "checked" : ""}>
+          <label for="${w}-${q.id}-${v}"><span class="n">${l}</span></label>`).join("")}
+      </div></fieldset>`;
+    }).join("");
+  }
+  const label = state.mode === "two" ? "Your answers" : nm(w);
+  return `
+  <header class="stack">
+    <span class="eyebrow"><span class="dot ${w}"></span>${label} · Part ${step + 1} of ${total}</span>
+    <div class="progress" aria-hidden="true"><i style="width:${pct}%"></i></div>
+    <h2 tabindex="-1">${title}</h2>
+    <p class="muted">${sub}</p>
+  </header>
+  <section class="panel">${body}</section>
+  <div class="navrow">
+    ${step > 0 ? `<button class="btn-ghost" data-act="back">Back</button>` : `<span></span>`}
+    <button class="btn" data-act="next" id="next-btn" ${complete() ? "" : "disabled"}>${isSafety ? "Finish my answers" : "Next"}</button>
+  </div>
+  <p class="fine">1 = strongly disagree, 5 = strongly agree. Go with your first reaction about the last few weeks.</p>`;
+}
+
+function vSupport() {
+  const w = state.who;
+  const who = state.mode === "two" ? "you" : nm(w);
+  return `
+  <section class="panel support stack-lg">
+    <span class="eyebrow">Private to ${who}</span>
+    <h2 tabindex="-1">Thank you for answering honestly</h2>
+    <p>You said you don't always feel safe with your partner, or that you sometimes feel afraid or controlled. A check-in like this assumes both people feel safe to speak openly, so it may not be the right starting point for you. Talking with someone on your own can help, and it's confidential.</p>
+    <ul>
+      <li>1800RESPECT (family and domestic violence, 24/7): <span class="phone">1800 737 732</span></li>
+      <li>Lifeline (crisis support, 24/7): <span class="phone">13 11 14</span></li>
+      <li>If you're in immediate danger, call <span class="phone">000</span>.</li>
+    </ul>
+    <p class="fine">Your partner won't see this message or these answers. If you stop here, everything on this device is cleared, including past check-ins, and nothing is sent.</p>
+    <div class="row">
+      <button class="btn-ghost" data-act="stop">Stop here and clear everything</button>
+      <button class="btn" data-act="continue">Continue the check-in</button>
+    </div>
+  </section>`;
+}
+
+function vHandover() {
+  return `
+  <section class="panel stack-lg">
+    <span class="eyebrow">Done · ${nm("a")}</span>
+    <h2 tabindex="-1">Hand over to ${nm("b")}</h2>
+    <p class="muted">${nm("a")}'s answers are saved and hidden. ${nm("b")}, answer on your own and go with your first reaction. Results appear once you've both finished.</p>
+    <div class="row"><button class="btn" data-act="startb">I'm ${nm("b")}, start my answers</button></div>
+  </section>`;
+}
+
+function vShare() {
+  const them = nm(other(state.who));
+  return `
+  ${state.notice === "own" ? `<div class="banner">That's your own link. Send it to ${them} rather than opening it yourself.</div>` : ""}
+  <section class="panel stack-lg">
+    <span class="eyebrow">Your answers are done</span>
+    <h2 tabindex="-1">Now send this link to ${them}</h2>
+    <p class="muted">Your answers are packed inside the link, so nothing is stored anywhere else. When ${them} opens it, they answer on their own phone, and only then see both sets of results.</p>
+    ${linkBox("my-link", personLink())}
+    <p class="fine">Anyone with this link could see your answers, so send it only to ${them}, by text or message.</p>
+  </section>
+  <section class="panel stack">
+    <h3>Got a link back?</h3>
+    <p class="note">When ${them} finishes, they'll get a results link to send you. If they did the check-in separately, paste their link here instead.</p>
+    <label class="field" for="paste-input"><span>Link or code from ${them}</span>
+      <input type="text" id="paste-input" autocomplete="off" placeholder="Paste here"></label>
+    ${pasteError ? `<p class="error" role="alert">${pasteError}</p>` : ""}
+    <div class="row"><button class="btn-ghost" data-act="paste">Show our results</button></div>
+  </section>
+  <div class="row">${resetControls()}</div>`;
+}
+
+function resetControls() {
+  return confirmReset
+    ? `<span>Start over? Answers in progress are cleared; past check-ins stay in your progress.</span><button class="btn" data-act="reset-yes">Yes, start over</button><button class="btn-ghost" data-act="reset-no">Cancel</button>`
+    : `<button class="link" data-act="reset">Start over</button>`;
+}
+
+// ctx: { names, answers, day, mode, who, fromLink, sample, live }
+function vResults(ctx) {
+  const N = w => esc(ctx.names[w] || (ctx.mode === "two" && !ctx.fromLink && w !== ctx.who ? "your partner" : (w === "a" ? "Partner 1" : "Partner 2")));
+  const R = analyse(ctx.answers);
+  const marks = `<span class="mark" style="left:${STEADY}%"></span><span class="mark" style="left:${STRONG}%"></span>`;
+  const bar = (w, v) => `<div class="bar" aria-label="${N(w)}: ${v} out of 100">
+      <div class="track">${marks}<span class="fill ${w}" style="width:${v}%"></span></div><span class="val">${v}</span></div>`;
+  const reasonFor = r => {
+    const lower = r.a < r.b ? "a" : "b";
+    if (r.status === "work" && r.gap >= GAP) return `${N(lower)} is feeling this much more than ${N(other(lower))} (${r[lower]} vs ${r[other(lower)]}).`;
+    if (r.status === "work") return `You both scored this below ${STEADY}.`;
+    return `You see this ${r.gap} points apart. Start by understanding why, before trying to fix anything.`;
+  };
+  const ansLabel = v => SCALE.find(s => s.v === v).l;
+  const sendTo = ctx.fromLink ? "" : N(other(ctx.who));
+
+  // The previous check-in for this couple, if this device has one.
+  const thisEntry = { day: ctx.day, A: encodePerson(ctx.names.a, ctx.answers.a), B: encodePerson(ctx.names.b, ctx.answers.b) };
+  const g = groupFor(pairKey(thisEntry));
+  let change = "";
+  if (g) {
+    const before = g.entries.filter(e => e.day < ctx.day || (e.day === ctx.day && entryKey(e) !== entryKey(thisEntry) && g.entries.indexOf(e) < g.entries.findIndex(x => entryKey(x) === entryKey(thisEntry))));
+    if (before.length) {
+      const s = series([...before, thisEntry]);
+      const pts = s.points;
+      change = `<section class="panel stack">
+        <h2>Since your last check-in</h2>
+        <p class="muted">Compared with ${fmtDay(pts[pts.length - 2].day)}.</p>
+        ${vChange(pts[pts.length - 2], pts[pts.length - 1], s.names)}
+        <div class="row"><button class="btn-ghost" data-act="progress" data-group="${esc(g.key)}">See all ${g.entries.length} check-ins</button></div>
+      </section>`;
+    }
+  }
+
+  return `
+  ${ctx.sample ? `<div class="banner row" style="justify-content:space-between"><span><b>Sample report.</b> Sam and Jordan are made-up example people.</span><button class="link" data-act="home">Back to start</button></div>` : ""}
+  ${!ctx.live ? `<div class="row"><button class="link" data-act="close">Back to progress</button></div>` : ""}
+  <header class="stack">
+    <span class="eyebrow">Check-in results${ctx.day != null ? ` · ${fmtDay(ctx.day)}` : ""}</span>
+    <h1 tabindex="-1">${N("a")} and ${N("b")}</h1>
+  </header>
+
+  <section class="scores">
+    ${["a", "b"].map(w => `<div class="panel score ${w}">
+      <span class="eyebrow">${N(w)}</span>
+      <span class="big">${R.overall[w]}<small> / 100</small></span>
+      <p>${N(w)} ${overallLine(R.overall[w])}.</p>
+    </div>`).join("")}
+  </section>
+
+  ${change}
+
+  ${ctx.mode === "two" && !ctx.sample && ctx.live ? `<section class="panel stack">
+    <h2>${sendTo ? `Send these results to ${sendTo}` : "Results link"}</h2>
+    <p class="note">This link opens this same report on any phone and adds it to that phone's progress. It holds both sets of answers, so share it only between the two of you.</p>
+    ${linkBox("results-link", resultsLink())}
+  </section>` : ""}
+
+  <section class="panel stack">
+    <h2>Start here</h2>
+    ${R.priorities.length ? R.priorities.map(r => `<div class="priority">
+        <div class="domain-head"><h3>${r.d.name}</h3><span class="pill ${r.status}">${bandLabel[r.status]}</span></div>
+        <p class="note">${reasonFor(r)}</p>
+        <p><b>Try this week:</b> ${r.d.tip}</p>
+      </div>`).join("")
+      : `<p>Nothing is flagged as needing work, and you see things much the same way. Keep doing what you're doing, and use the statements below to stay curious about each other.</p>`}
+  </section>
+
+  <section class="panel stack">
+    <h2>All eight areas</h2>
+    <div class="legend"><span><span class="dot a"></span>${N("a")}</span><span><span class="dot b"></span>${N("b")}</span><span>Tick marks at ${STEADY} and ${STRONG}</span></div>
+    <div>
+      ${R.rows.map(r => `<div class="domain">
+        <div class="domain-head"><h3>${r.d.name}</h3><span class="pill ${r.status}">${bandLabel[r.status]}</span></div>
+        ${bar("a", r.a)}${bar("b", r.b)}
+      </div>`).join("")}
+      <div class="axis" aria-hidden="true"><span style="left:0;transform:none">0</span><span style="left:${STEADY}%">${STEADY}</span><span style="left:${STRONG}%">${STRONG}</span><span style="left:100%;transform:translateX(-100%)">100</span></div>
+    </div>
+    ${R.strengths.length ? `<p class="note">Shared strengths: ${R.strengths.map(r => r.d.name).join(", ")}. Lean on these when the harder conversations come up.</p>` : ""}
+  </section>
+
+  <section class="panel stack">
+    <h2>Statements to talk about</h2>
+    ${R.talks.length ? `<p class="muted">You answered these very differently. Ask each other what you had in mind, and listen before replying.</p>` + R.talks.map(x => `<div class="talk">
+        <span class="eyebrow">${x.i.domain.name}</span>
+        <p>“${esc(x.i.t)}”</p>
+        <div class="answers"><span><span class="dot a"></span>${N("a")}: ${ansLabel(x.ra)}</span><span><span class="dot b"></span>${N("b")}: ${ansLabel(x.rb)}</span></div>
+      </div>`).join("")
+      : `<p>You didn't answer any statement more than one step apart.</p>`}
+  </section>
+
+  ${ctx.live && !ctx.sample ? `<section class="panel stack">
+    <h2>Check in again in a month</h2>
+    <p class="note">Put a reminder in your calendar for around <b>${fmtDay((ctx.day ?? todayDay()) + CADENCE)}</b>. Next time, this page will show what has changed. Use the same names so the check-ins line up.</p>
+    <div class="row"><button class="btn" data-act="new">Start the next check-in</button>${g ? `<button class="btn-ghost" data-act="progress" data-group="${esc(g.key)}">See your progress</button>` : ""}</div>
+  </section>` : ""}
+  ${ctx.sample ? `<div class="row"><button class="btn" data-act="progress" data-group="${esc(g ? g.key : "")}">See Sam and Jordan's progress</button></div>` : ""}
+
+  <section class="stack">
+    <p class="fine">Scores are the average of each area's four statements, rescaled to 0–100, with warning-sign statements reversed. Below ${STEADY} reads as needs work, ${STRONG} and above as a strength, and a gap of ${GAP}+ points means you see the area differently. These cut-offs are provisional and not clinically validated. If several areas need work, or the same argument keeps coming back, a couples counsellor is a good next step.</p>
+  </section>`;
+}
+
+function vProgress() {
+  const all = groups();
+  const g = groupFor(view.group) || all[0];
+  if (!g) return `<section class="panel stack"><h2 tabindex="-1">No check-ins yet</h2><p class="muted">Finished check-ins are saved on this phone and show up here.</p><div class="row"><button class="btn" data-act="close">Back</button></div></section>`;
+  const s = series(g.entries), pts = s.points, last = pts[pts.length - 1];
+  const X = esc(s.names.a || "Partner 1"), Y = esc(s.names.b || "Partner 2");
+  const title = { a: s.names.a || "Partner 1", b: s.names.b || "Partner 2" };
+  const legend = `<div class="legend"><span><span class="dot a"></span>${X}</span><span><span class="dot b"></span>${Y}</span><span>Lines at ${STEADY} and ${STRONG}</span></div>`;
+  const others = all.filter(x => x.key !== g.key);
+  const isSample = !!sampleHistory;
+
+  return `
+  ${isSample ? `<div class="banner row" style="justify-content:space-between"><span><b>Sample progress.</b> Sam and Jordan are made-up example people.</span><button class="link" data-act="home">Back to start</button></div>` : ""}
+  <div class="row"><button class="link" data-act="close">Back</button></div>
+  <header class="stack">
+    <span class="eyebrow">Progress · ${g.entries.length} check-in${g.entries.length > 1 ? "s" : ""} since ${fmtDay(pts[0].day)}</span>
+    <h1 tabindex="-1">${X} and ${Y} over time</h1>
+  </header>
+
+  ${pts.length < 2 ? `<section class="panel stack">
+      <h2>One check-in so far</h2>
+      <p class="muted">Do the next one around ${fmtDay(last.day + CADENCE)} to see what has changed. Charts appear from the second check-in.</p>
+    </section>` : `
+  <section class="panel stack">
+    <h2>Since last time</h2>
+    <p class="muted">${fmtDay(pts[pts.length - 2].day)} to ${fmtDay(last.day)}.</p>
+    ${vChange(pts[pts.length - 2], last, s.names)}
+  </section>
+
+  <section class="panel stack">
+    <h2>Overall</h2>
+    ${legend}
+    ${lineChart(pts, (p, w) => p[w], { w: 320, h: 170, title: { ...title, label: `Overall scores over time for ${title.a} and ${title.b}` } })}
+  </section>
+
+  <section class="panel stack">
+    <h2>By area</h2>
+    ${legend}
+    <div class="minis">
+      ${DOMAINS.map((d, k) => {
+        const lr = last.rows[k];
+        return `<div class="mini">
+          <div class="domain-head"><h3>${d.name}</h3><span class="pill ${lr.status}">${bandLabel[lr.status]}</span></div>
+          ${lineChart(pts, (p, w) => p.rows[k][w], { w: 300, h: 120, mini: true, title: { ...title, label: `${d.name} over time` } })}
+        </div>`;
+      }).join("")}
+    </div>
+    <p class="fine">Same dates as the overall chart. Status shows the latest check-in.</p>
+  </section>`}
+
+  <section class="panel stack">
+    <h2>All check-ins</h2>
+    <div class="table-wrap"><table class="hist">
+      <thead><tr><th>Date</th><th class="num"><span class="dot a"></span>${X}</th><th class="num"><span class="dot b"></span>${Y}</th><th></th></tr></thead>
+      <tbody>
+      ${[...pts].reverse().map(p => {
+        const k = entryKey(p.e);
+        return `<tr><td>${fmtDay(p.day)}</td><td class="num">${p.a}</td><td class="num">${p.b}</td>
+          <td class="acts">${confirmRemove === k
+            ? `<button class="link danger" data-act="remove-yes" data-key="${esc(k)}">Remove it</button> <button class="link" data-act="remove-no">Keep</button>`
+            : `<button class="link" data-act="open" data-key="${esc(k)}">Open</button>${isSample ? "" : ` <button class="link" data-act="remove" data-key="${esc(k)}">Remove</button>`}`}</td></tr>`;
+      }).join("")}
+      </tbody>
+    </table></div>
+  </section>
+
+  ${isSample ? "" : `<section class="panel stack">
+    <h2>Keep your history safe</h2>
+    <p class="note">Check-ins are saved on this phone only, and phones can clear saved data. Save this link somewhere private, such as a note, to restore your history or move it to another phone. Opening it on your partner's phone gives them the same history.</p>
+    ${linkBox("history-link", historyLink(g.entries))}
+    <p class="fine">The link holds every answer from these check-ins. Share it only between the two of you.</p>
+    <div class="row">${confirmClearHistory
+      ? `<span>Delete all ${g.entries.length} check-ins for ${X} and ${Y} from this phone?</span><button class="btn" data-act="clear-hist-yes">Delete them</button><button class="btn-ghost" data-act="clear-hist-no">Cancel</button>`
+      : `<button class="link" data-act="clear-hist">Delete this history from this phone</button>`}</div>
+  </section>`}
+
+  ${others.length ? `<section class="stack">
+    <h3>Other couples on this phone</h3>
+    <div class="row">${others.map(o => { const os = series(o.entries); return `<button class="btn-ghost" data-act="progress" data-group="${esc(o.key)}">${esc(os.names.a || "Partner 1")} and ${esc(os.names.b || "Partner 2")} (${o.entries.length})</button>`; }).join("")}</div>
+  </section>` : ""}`;
+}
+
+/* ---------- Flow ---------- */
+function complete() {
+  const w = state.who;
+  if (state.step === DOMAINS.length) return SAFETY.every(q => safety[w][q.id]);
+  return DOMAINS[state.step].items.every(i => state.answers[w][i.id]);
+}
+function flagged(w) { return SAFETY.some(q => q.flag.includes(safety[w][q.id])); }
+function afterPartner(render = true) {
+  safety[state.who] = {};
+  if (state.mode === "one") state.stage = state.who === "a" ? "handover" : "results";
+  else state.stage = hasAll(state.answers[other(state.who)]) ? "results" : "share";
+  if (render) go();
+}
+function sampleAnswers(c) {
+  const answers = { a: {}, b: {} };
+  ["a", "b"].forEach(w => DOMAINS.forEach(d => d.items.forEach((i, k) => { answers[w][i.id] = c[w][d.id][k]; })));
+  return answers;
+}
+function startSample() {
+  sampleHistory = SAMPLE.checkins.map(c => {
+    const ans = sampleAnswers(c);
+    return { day: isoToDay(c.date), A: encodePerson(SAMPLE.names.a, ans.a), B: encodePerson(SAMPLE.names.b, ans.b) };
+  });
+  const lastC = SAMPLE.checkins[SAMPLE.checkins.length - 1];
+  state = { ...fresh(), stage: "results", mode: "one", names: { ...SAMPLE.names }, answers: sampleAnswers(lastC), day: isoToDay(lastC.date), sample: true };
+  view = null;
+  go();
+}
+function stateCtx() {
+  return { names: state.names, answers: state.answers, day: state.day, mode: state.mode, who: state.who, fromLink: !!state.fromLink, sample: !!state.sample, live: true };
+}
+function entryCtx(e) {
+  const A = decodePerson(e.A), B = decodePerson(e.B);
+  return { names: { a: A.name, b: B.name }, answers: { a: A.answers, b: B.answers }, day: e.day, mode: "one", who: "a", fromLink: true, sample: !!sampleHistory, live: false };
+}
+async function copyLink(id) {
+  const el = document.getElementById(id), status = document.getElementById(id + "-status");
+  try {
+    await navigator.clipboard.writeText(el.textContent);
+    status.textContent = "Copied. Paste it into a message or note.";
+  } catch (e) {
+    const range = document.createRange(); range.selectNodeContents(el);
+    const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+    status.textContent = "Selected. Copy it from your keyboard or menu.";
+  }
+}
+
+const app = document.getElementById("app");
+function go(focus = true) {
+  if (!state.sample) sampleHistory = null;
+  save();
+  recordResults();
+  let html;
+  if (view && view.kind === "progress") html = vProgress();
+  else if (view && view.kind === "report") html = vResults(entryCtx(view.entry));
+  else if (state.stage === "results") html = vResults(stateCtx());
+  else html = ({ intro: vIntro, invited: vInvited, quiz: vQuiz, support: vSupport, handover: vHandover, share: vShare }[state.stage] || vIntro)();
+  app.innerHTML = html;
+  if (focus) {
+    window.scrollTo(0, 0);
+    const h = app.querySelector("[tabindex='-1']");
+    if (h) h.focus({ preventScroll: true });
+  }
+}
+
+app.addEventListener("input", e => {
+  const n = e.target.dataset.name;
+  if (n) { state.names[n] = e.target.value.trim().slice(0, 40); save(); }
+});
+app.addEventListener("change", e => {
+  const t = e.target;
+  if (t.dataset.item) { state.answers[state.who][t.dataset.item] = Number(t.value); save(); }
+  else if (t.dataset.safe) { safety[state.who][t.dataset.safe] = t.value; }
+  else return;
+  const nb = document.getElementById("next-btn");
+  if (nb) nb.disabled = !complete();
+});
+app.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]");
+  if (!b) return;
+  const act = b.dataset.act;
+  if (act === "start-two" || act === "start-one") {
+    state.mode = act === "start-two" ? "two" : "one";
+    state.stage = "quiz"; state.who = "a"; state.step = 0; state.day = null; go();
+  }
+  else if (act === "start-invited") { state.stage = "quiz"; state.step = 0; go(); }
+  else if (act === "sample") startSample();
+  else if (act === "home") { view = null; sampleHistory = null; state = fresh(); load(); if (state.sample) state = fresh(); go(); }
+  else if (act === "back") { state.step = Math.max(0, state.step - 1); go(); }
+  else if (act === "next" && complete()) {
+    if (state.step < DOMAINS.length) { state.step++; go(); }
+    else if (flagged(state.who)) { state.stage = "support"; safety[state.who] = {}; go(); }
+    else afterPartner();
+  }
+  else if (act === "continue") afterPartner();
+  else if (act === "stop") wipeAll();
+  else if (act === "startb") { state.who = "b"; state.step = 0; state.stage = "quiz"; go(); }
+  else if (act === "copy") copyLink(b.dataset.target);
+  else if (act === "paste") {
+    const r = parseShared(document.getElementById("paste-input").value);
+    if (!r) { pasteError = "That doesn't look like a check-in link. Copy the whole link your partner sent and try again."; go(false); }
+    else { pasteError = ""; applyShared(r); go(); }
+  }
+  else if (act === "progress") { view = { kind: "progress", group: b.dataset.group }; confirmRemove = null; confirmClearHistory = false; go(); }
+  else if (act === "open") {
+    const entry = activeHistory().find(x => entryKey(x) === b.dataset.key);
+    if (entry) { view = { kind: "report", entry, group: view && view.group }; go(); }
+  }
+  else if (act === "close") {
+    view = view && view.kind === "report" ? { kind: "progress", group: view.group } : null;
+    go();
+  }
+  else if (act === "remove") { confirmRemove = b.dataset.key; go(false); }
+  else if (act === "remove-no") { confirmRemove = null; go(false); }
+  else if (act === "remove-yes") {
+    saved = saved.filter(x => entryKey(x) !== b.dataset.key); saveHistory(); confirmRemove = null;
+    if (!saved.length) view = null;
+    go(false);
+  }
+  else if (act === "clear-hist") { confirmClearHistory = true; go(false); }
+  else if (act === "clear-hist-no") { confirmClearHistory = false; go(false); }
+  else if (act === "clear-hist-yes") {
+    const key = groupFor(view.group) ? view.group : (groups()[0] || {}).key;
+    saved = saved.filter(x => pairKey(x) !== key); saveHistory();
+    confirmClearHistory = false; view = null; go();
+  }
+  else if (act === "new") newCheckin();
+  else if (act === "reset") { confirmReset = true; go(false); }
+  else if (act === "reset-no") { confirmReset = false; go(false); }
+  else if (act === "reset-yes") newCheckin();
+});
+window.addEventListener("hashchange", () => { if (handleHash()) go(); });
+
+load();
+handleHash();
+go(false);
+
+</script>
+</body>
+</html>
