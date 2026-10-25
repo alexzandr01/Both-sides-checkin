@@ -188,6 +188,15 @@ table.hist thead th { border-top: 0; font-size: 0.8rem; color: var(--muted); fon
 table.hist .num { text-align: right; }
 table.hist .acts { text-align: right; }
 .link.danger { color: var(--bad); }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; width: fit-content; max-width: 100%; }
+.tabs button { padding: 8px 14px; background: transparent; color: var(--muted); border-radius: 10px; }
+.tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+.stood { display: grid; gap: 6px; padding: 12px 0; border-top: 1px solid var(--line); }
+.stood:first-of-type { border-top: 0; padding-top: 4px; }
+.chip { font-size: 0.78rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); width: fit-content; }
+.mixed-pair { display: grid; gap: 4px; font-size: 0.92rem; }
+.mixed-pair span { color: var(--muted); }
+.score .link { justify-self: start; font-size: 0.9rem; }
 @media (prefers-reduced-motion: reduce) { .progress > i { transition: none; } }
 </style>
 </head>
@@ -310,6 +319,8 @@ let confirmReset = false;
 let confirmRemove = null;
 let confirmClearHistory = false;
 let pasteError = "";
+let nameError = "";
+let resultsTab = "both";   // results screen: "both", "a" or "b"
 
 function fresh() {
   return { mode: "two", stage: "intro", who: "a", step: 0, names: { a: "", b: "" }, answers: { a: {}, b: {} } };
@@ -446,6 +457,7 @@ const historyLink = entries => `${SITE_URL}#h-${entries.map(e => `${dayCode(e.da
 
 // Apply a link or pasted code. Returns true when the state changed.
 function applyShared(r) {
+  resultsTab = "both";
   if (r.type === "h") {
     r.entries.forEach(addToHistory);
     view = { kind: "progress", group: pairKey(r.entries[r.entries.length - 1]) };
@@ -639,6 +651,7 @@ function vIntro() {
       <label class="field" for="name-b"><span>Your partner's name</span>
         <input type="text" id="name-b" data-name="b" value="${esc(state.names.b)}" placeholder="e.g. Sam" autocomplete="off" maxlength="40"></label>
     </div>
+    ${nameError ? `<p class="error" role="alert">${nameError}</p>` : ""}
     <p class="fine">Use the same names each time so your check-ins line up in your progress.</p>
     <div class="modes">
       <div class="mode">
@@ -674,12 +687,13 @@ function vInvited() {
   return `
   <header class="stack">
     <span class="eyebrow">Relationship check-in · your turn</span>
-    <h1 tabindex="-1">${nm("a")} has done their half</h1>
+    <h1 tabindex="-1">${cap(nm("a"))} has done their half</h1>
     <p class="muted">Now answer 32 short statements on your own, in about five minutes. ${nm("a")}'s answers stay hidden until you've finished. Then you'll both see how each of you sees the relationship and what to work on first.</p>
   </header>
   <section class="panel stack-lg">
     <label class="field" for="name-self"><span>Your name</span>
       <input type="text" id="name-self" data-name="b" value="${esc(state.names.b)}" placeholder="e.g. Sam" autocomplete="off" maxlength="40"></label>
+    ${nameError ? `<p class="error" role="alert">${nameError}</p>` : ""}
     <div class="row"><button class="btn" data-act="start-invited">Start my answers</button></div>
     <p class="fine">There's a short private safety question at the end that ${nm("a")} will never see. This is a conversation starter, not a clinical assessment.</p>
   </section>`;
@@ -768,6 +782,12 @@ function vShare() {
     ${linkBox("my-link", personLink())}
     <p class="fine">Anyone with this link could see your answers, so send it only to ${them}, by text or message.</p>
   </section>
+  <header class="stack">
+    <span class="eyebrow">Your results</span>
+    <h2>How you see the relationship</h2>
+    <p class="muted">${poss(cap(them))} view and the comparison between you appear once they've finished.</p>
+  </header>
+  ${vIndividual(state.answers[state.who], nm(state.who), { self: true, w: state.who })}
   <section class="panel stack">
     <h3>Got a link back?</h3>
     <p class="note">When ${them} finishes, they'll get a results link to send you. If they did the check-in separately, paste their link here instead.</p>
@@ -785,6 +805,88 @@ function resetControls() {
     : `<button class="link" data-act="reset">Start over</button>`;
 }
 
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const poss = s => (/s$/i.test(s) ? `${s}'` : `${s}'s`);
+const answerLabel = v => SCALE.find(s => s.v === v).l;
+
+// One person's answers on their own: no comparison, nothing from the partner.
+function vIndividual(ans, label, { self, w }) {
+  const rows = DOMAINS.map(d => {
+    const scored = d.items.map(i => ({ i, v: ans[i.id], a: adj(i, ans[i.id]) }));
+    const score = domainScore(d, ans);
+    const hi = scored.reduce((x, y) => (y.a > x.a ? y : x)), lo = scored.reduce((x, y) => (y.a < x.a ? y : x));
+    return { d, score, band: score >= STRONG ? "strength" : score >= STEADY ? "steady" : "work", hi, lo };
+  });
+  const overall = Math.round(rows.reduce((s, r) => s + r.score, 0) / rows.length);
+  const ranked = [...rows].sort((x, y) => y.score - x.score);
+  const going = ranked.filter(r => r.score >= STEADY).slice(0, 3);
+  const strain = ranked.filter(r => r.score < STEADY).reverse();
+  // A spread of 3+ steps inside one area (e.g. agree with one statement, disagree with another).
+  const mixed = rows.filter(r => r.hi.a - r.lo.a >= 3);
+  const stood = ITEMS.map(i => ({ i, v: ans[i.id], a: adj(i, ans[i.id]) }))
+    .filter(x => x.a <= 2).sort((x, y) => x.a - y.a).slice(0, 5);
+  const whose = self ? "your answers" : `${poss(label)} answers`;
+  const bandText = overall >= STRONG ? "In good shape overall" : overall >= STEADY ? "Mostly steady, with some strain" : "Under real strain overall";
+  const marks = `<span class="mark" style="left:${STEADY}%"></span><span class="mark" style="left:${STRONG}%"></span>`;
+  return `
+  <section class="panel score ${w}">
+    <span class="eyebrow">${self ? "Your view" : `${poss(cap(label))} view`}</span>
+    <span class="big">${overall}<small> / 100</small></span>
+    <p>${bandText}. Based only on ${whose}.</p>
+  </section>
+
+  <section class="panel stack">
+    <h2>Area by area</h2>
+    <p class="muted">Strongest to weakest. Tick marks at ${STEADY} and ${STRONG}.</p>
+    <div>
+      ${ranked.map(r => `<div class="domain">
+        <div class="domain-head"><h3>${r.d.name}</h3><span class="pill ${r.band}">${bandLabel[r.band]}</span></div>
+        <div class="bar" aria-label="${r.d.name}: ${r.score} out of 100"><div class="track">${marks}<span class="fill ${w}" style="width:${r.score}%"></span></div><span class="val">${r.score}</span></div>
+      </div>`).join("")}
+    </div>
+  </section>
+
+  <section class="panel stack">
+    <h2>Going well</h2>
+    ${going.length ? going.map(r => `<div class="priority">
+        <div class="domain-head"><h3>${r.d.name}</h3><span class="pill ${r.band}">${r.score}</span></div>
+        <p class="note">${r.d.blurb}. ${r.score >= STRONG ? "A clear strength to lean on." : "Steady, with room to grow."}</p>
+      </div>`).join("")
+      : `<p>No area scored ${STEADY} or above, which is a lot to carry. Talking to a counsellor, alone or together, can help.</p>`}
+  </section>
+
+  <section class="panel stack">
+    <h2>Needs attention</h2>
+    ${strain.length ? strain.map(r => `<div class="priority">
+        <div class="domain-head"><h3>${r.d.name}</h3><span class="pill work">${r.score}</span></div>
+        <p><b>Try this week:</b> ${r.d.tip}</p>
+      </div>`).join("")
+      : `<p>No area scored below ${STEADY}.</p>`}
+  </section>
+
+  ${mixed.length ? `<section class="panel stack">
+    <h2>Mixed feelings</h2>
+    <p class="muted">In these areas some statements scored high and others low, which the area score hides. Worth asking which part matters most.</p>
+    ${mixed.map(r => `<div class="priority">
+        <h3>${r.d.name}</h3>
+        <div class="mixed-pair">
+          <div>“${esc(r.hi.i.t)}” <span>${answerLabel(r.hi.v)}</span></div>
+          <div>“${esc(r.lo.i.t)}” <span>${answerLabel(r.lo.v)}</span></div>
+        </div>
+      </div>`).join("")}
+  </section>` : ""}
+
+  <section class="panel stack">
+    <h2>Statements that stood out</h2>
+    ${stood.length ? `<p class="muted">The answers that pointed most clearly to strain.</p>` + stood.map(x => `<div class="stood">
+        <span class="eyebrow">${x.i.domain.name}</span>
+        <p>“${esc(x.i.t)}”</p>
+        <span class="chip">${answerLabel(x.v)}</span>
+      </div>`).join("")
+      : `<p>None of ${whose} pointed clearly to strain.</p>`}
+  </section>`;
+}
+
 // ctx: { names, answers, day, mode, who, fromLink, sample, live }
 function vResults(ctx) {
   const N = w => esc(ctx.names[w] || (ctx.mode === "two" && !ctx.fromLink && w !== ctx.who ? "your partner" : (w === "a" ? "Partner 1" : "Partner 2")));
@@ -800,6 +902,11 @@ function vResults(ctx) {
   };
   const ansLabel = v => SCALE.find(s => s.v === v).l;
   const sendTo = ctx.fromLink ? "" : N(other(ctx.who));
+  const selfFor = w => ctx.mode === "two" && !ctx.fromLink && !ctx.sample && w === ctx.who;
+  const tab = resultsTab === "a" || resultsTab === "b" ? resultsTab : "both";
+  const tabs = `<div class="tabs" role="tablist" aria-label="Which results to show">
+    ${[["both", "Together"], ["a", null], ["b", null]].map(([t, l]) => `<button role="tab" aria-selected="${tab === t}" data-act="tab" data-tab="${t}">${l || (selfFor(t) ? "Your view" : `${poss(cap(N(t)))} view`)}</button>`).join("")}
+  </div>`;
 
   // The previous check-in for this couple, if this device has one.
   const thisEntry = { day: ctx.day, A: encodePerson(ctx.names.a, ctx.answers.a), B: encodePerson(ctx.names.b, ctx.answers.b) };
@@ -827,11 +934,14 @@ function vResults(ctx) {
     <h1 tabindex="-1">${N("a")} and ${N("b")}</h1>
   </header>
 
+  ${tabs}
+  ${tab !== "both" ? vIndividual(ctx.answers[tab], N(tab), { self: selfFor(tab), w: tab }) : `
   <section class="scores">
     ${["a", "b"].map(w => `<div class="panel score ${w}">
       <span class="eyebrow">${N(w)}</span>
       <span class="big">${R.overall[w]}<small> / 100</small></span>
-      <p>${N(w)} ${overallLine(R.overall[w])}.</p>
+      <p>${cap(N(w))} ${overallLine(R.overall[w])}.</p>
+      <button class="link" data-act="tab" data-tab="${w}">See ${selfFor(w) ? "your" : poss(N(w))} full view</button>
     </div>`).join("")}
   </section>
 
@@ -885,7 +995,7 @@ function vResults(ctx) {
 
   <section class="stack">
     <p class="fine">Scores are the average of each area's four statements, rescaled to 0–100, with warning-sign statements reversed. Below ${STEADY} reads as needs work, ${STRONG} and above as a strength, and a gap of ${GAP}+ points means you see the area differently. These cut-offs are provisional and not clinically validated. If several areas need work, or the same argument keeps coming back, a couples counsellor is a good next step.</p>
-  </section>`;
+  </section>`}`;
 }
 
 function vProgress() {
@@ -978,6 +1088,7 @@ function complete() {
 }
 function flagged(w) { return SAFETY.some(q => q.flag.includes(safety[w][q.id])); }
 function afterPartner(render = true) {
+  resultsTab = "both";
   safety[state.who] = {};
   if (state.mode === "one") state.stage = state.who === "a" ? "handover" : "results";
   else state.stage = hasAll(state.answers[other(state.who)]) ? "results" : "share";
@@ -989,6 +1100,7 @@ function sampleAnswers(c) {
   return answers;
 }
 function startSample() {
+  resultsTab = "both";
   sampleHistory = SAMPLE.checkins.map(c => {
     const ans = sampleAnswers(c);
     return { day: isoToDay(c.date), A: encodePerson(SAMPLE.names.a, ans.a), B: encodePerson(SAMPLE.names.b, ans.b) };
@@ -1051,6 +1163,14 @@ app.addEventListener("click", e => {
   const b = e.target.closest("[data-act]");
   if (!b) return;
   const act = b.dataset.act;
+  if ((act === "start-two" && !state.names.a) || (act === "start-invited" && !state.names.b)) {
+    nameError = act === "start-two" ? "Add your name first, so your partner knows who the link is from." : "Add your name first, so it shows on your shared results.";
+    go(false);
+    const f = document.getElementById(act === "start-two" ? "name-a" : "name-self");
+    if (f) f.focus();
+    return;
+  }
+  nameError = "";
   if (act === "start-two" || act === "start-one") {
     state.mode = act === "start-two" ? "two" : "one";
     state.stage = "quiz"; state.who = "a"; state.step = 0; state.day = null; go();
@@ -1069,13 +1189,21 @@ app.addEventListener("click", e => {
   else if (act === "startb") { state.who = "b"; state.step = 0; state.stage = "quiz"; go(); }
   else if (act === "copy") copyLink(b.dataset.target);
   else if (act === "paste") {
-    const r = parseShared(document.getElementById("paste-input").value);
-    if (!r) { pasteError = "That doesn't look like a check-in link. Copy the whole link your partner sent and try again."; go(false); }
+    const raw = document.getElementById("paste-input").value.trim();
+    const r = parseShared(raw);
+    if (!raw) { pasteError = "Paste the link your partner sent you first."; go(false); }
+    else if (!r) { pasteError = "That doesn't look like a check-in link. Copy the whole link your partner sent and try again."; go(false); }
     else { pasteError = ""; applyShared(r); go(); }
   }
   else if (act === "progress") { view = { kind: "progress", group: b.dataset.group }; confirmRemove = null; confirmClearHistory = false; go(); }
+  else if (act === "tab") {
+    resultsTab = b.dataset.tab; go(false);
+    const t = app.querySelector(".tabs");
+    if (t) t.scrollIntoView({ block: "start" });
+  }
   else if (act === "open") {
     const entry = activeHistory().find(x => entryKey(x) === b.dataset.key);
+    resultsTab = "both";
     if (entry) { view = { kind: "report", entry, group: view && view.group }; go(); }
   }
   else if (act === "close") {
