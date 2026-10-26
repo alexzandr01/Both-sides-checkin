@@ -197,6 +197,30 @@ table.hist .acts { text-align: right; }
 .mixed-pair { display: grid; gap: 4px; font-size: 0.92rem; }
 .mixed-pair span { color: var(--muted); }
 .score .link { justify-self: start; font-size: 0.9rem; }
+.scale.guess label .n, .scale.three label .n { font-weight: 600; font-size: 0.8rem; line-height: 1.25; }
+.scale.list { grid-template-columns: 1fr; }
+.scale.list label { justify-items: start; text-align: left; padding: 10px 14px; }
+.scale.list label .n { font-weight: 500; }
+.legend-note { display: block; font-size: 0.85rem; color: var(--muted); font-weight: 400; }
+.na-row input, .picks input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.na-row label { display: inline-block; font-size: 0.85rem; padding: 6px 12px; border: 1px dashed var(--line); border-radius: 999px; color: var(--muted); cursor: pointer; }
+.na-row input:checked + label { border-style: solid; border-color: var(--accent); color: var(--ink); background: var(--bg); font-weight: 600; }
+.na-row input:focus-visible + label, .picks input:focus-visible + label { outline: 3px solid var(--accent); outline-offset: 2px; }
+.picks { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.picks label { display: grid; gap: 2px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); cursor: pointer; min-width: 0; }
+.picks label span { color: var(--muted); font-size: 0.88rem; }
+.picks input:checked + label { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.picks input:disabled + label { opacity: 0.45; cursor: not-allowed; }
+.imp-tag { display: inline-block; vertical-align: 2px; margin-left: 6px; font-family: var(--body); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); }
+.imp-who { font-size: 0.82rem; color: var(--accent); font-weight: 600; margin: -2px 0 2px; }
+.pill.na { color: var(--muted); background: var(--bg); border: 1px solid var(--line); }
+.read-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.read-card { display: grid; gap: 4px; padding: 14px; border-radius: 12px; background: var(--bg); border-top: 3px solid var(--pa); min-width: 0; }
+.read-card.b { border-top-color: var(--pb); }
+.big-ish { font-family: var(--display); font-size: 2rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.big-ish small { font-family: var(--body); font-size: 0.9rem; color: var(--muted); }
+.miss { display: grid; gap: 4px; padding: 12px 0; border-top: 1px solid var(--line); }
+.pilot { border-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) { .progress > i { transition: none; } }
 </style>
 </head>
@@ -241,7 +265,7 @@ const DOMAINS = [
     items: [
       { id: "conf1", t: "We can raise a problem without it turning into an attack." },
       { id: "conf2", t: "I feel heard when we disagree, even if we don't end up agreeing." },
-      { id: "conf3", t: "Our arguments often involve criticism, sarcasm or eye-rolling.", r: true },
+      { id: "conf3", t: "When we argue, one of us often shows contempt, such as sarcasm or mocking.", r: true },
       { id: "conf4", t: "One of us often shuts down or walks away mid-disagreement.", r: true }
     ] },
   { id: "repr", name: "Repair", blurb: "Getting back on track after a rupture",
@@ -263,18 +287,18 @@ const DOMAINS = [
   { id: "intm", name: "Intimacy", blurb: "Physical closeness and sex",
     tip: "Each privately write three things that help you feel close, physical or not, then swap lists. Talk about one item from each list, without negotiating yet.",
     items: [
-      { id: "intm1", t: "I'm satisfied with the physical affection between us." },
-      { id: "intm2", t: "I'm satisfied with our sex life, or with the level of intimacy we've agreed on." },
-      { id: "intm3", t: "We can talk openly about what each of us wants in intimacy." },
-      { id: "intm4", t: "Physical closeness has become rare or feels like a chore.", r: true }
+      { id: "intm1", t: "I'm satisfied with the physical affection between us.", na: true },
+      { id: "intm2", t: "I'm satisfied with our sex life.", na: true },
+      { id: "intm3", t: "We can talk openly about what each of us wants in intimacy.", na: true },
+      { id: "intm4", t: "Physical closeness has become rare between us.", r: true, na: true }
     ] },
   { id: "team", name: "Teamwork", blurb: "Sharing the load and the direction",
     tip: "Together, list every recurring task (including the remembering and planning) and who owns it. Rebalance the two that feel most unfair.",
     items: [
-      { id: "team1", t: "The household work and mental load feel fairly shared." },
+      { id: "team1", t: "The work of running our life together feels fairly shared, including the planning and remembering." },
       { id: "team2", t: "We make big decisions (money, family, where we live) together." },
       { id: "team3", t: "We have a shared picture of where our life is heading." },
-      { id: "team4", t: "Stress from money, family or work regularly spills into how we treat each other.", r: true }
+      { id: "team4", t: "Outside pressures, such as work, money or family, regularly spill into how we treat each other.", r: true }
     ] }
 ];
 
@@ -283,6 +307,28 @@ const SAFETY = [
     opts: [["yes", "Yes"], ["notalways", "Not always"], ["no", "No"]], flag: ["notalways", "no"] },
   { id: "safe2", t: "I feel afraid of my partner, or controlled by them (money, phone, who I see, where I go).",
     opts: [["no", "No"], ["sometimes", "Sometimes"], ["yes", "Yes"]], flag: ["sometimes", "yes"] }
+];
+
+// How each partner thinks the other would rate an area, mapped onto the 0–100 area scale.
+const GUESS = [
+  { v: 0, l: "Really struggling" }, { v: 25, l: "Not great" }, { v: 50, l: "Mixed" },
+  { v: 75, l: "Good" }, { v: 100, l: "Really good" }
+];
+const MISREAD = 25;  // a guess this far from the partner's own score is a blind spot
+const IMPORTANT_PICKS = 2;
+
+// Pilot study only: the Couples Satisfaction Index, 4-item version (Funk & Rogge, 2007),
+// used as an established yardstick for our own scores. Free for research use; check
+// the licence before any commercial use. Totals run 0–21; below 13.5 suggests distress.
+const CSI = [
+  { t: "Please indicate the degree of happiness, all things considered, of your relationship.",
+    opts: ["Extremely unhappy", "Fairly unhappy", "A little unhappy", "Happy", "Very happy", "Extremely happy", "Perfect"] },
+  { t: "I have a warm and comfortable relationship with my partner.",
+    opts: ["Not at all true", "A little true", "Somewhat true", "Mostly true", "Almost completely true", "Completely true"] },
+  { t: "How rewarding is your relationship with your partner?",
+    opts: ["Not at all", "A little", "Somewhat", "Mostly", "Almost completely", "Completely"] },
+  { t: "In general, how satisfied are you with your relationship?",
+    opts: ["Not at all", "A little", "Somewhat", "Mostly", "Almost completely", "Completely"] }
 ];
 
 const STRONG = 75, STEADY = 55, GAP = 20;
@@ -302,7 +348,10 @@ const SAMPLE = {
     { date: "2026-08-23", a: { know: [4,3,3,3], appr: [3,3,3,3], resp: [4,4,3,2], conf: [2,3,4,4], repr: [4,4,4,3], trst: [5,5,4,1], intm: [2,2,3,4], team: [3,4,4,3] },
                           b: { know: [4,3,3,2], appr: [2,3,2,3], resp: [4,3,2,2], conf: [3,3,4,4], repr: [4,4,4,2], trst: [5,5,5,1], intm: [4,4,4,2], team: [2,4,4,3] } },
     { date: "2026-09-27", a: { know: [4,4,3,2], appr: [3,4,3,3], resp: [4,4,3,2], conf: [2,3,4,4], repr: [4,4,4,2], trst: [5,5,4,1], intm: [2,2,3,4], team: [4,4,4,3] },
-                          b: { know: [4,3,3,2], appr: [2,3,2,4], resp: [4,4,2,2], conf: [3,3,3,4], repr: [4,4,5,2], trst: [5,5,5,1], intm: [4,4,4,2], team: [2,4,4,3] } }
+                          b: { know: [4,3,3,2], appr: [2,3,2,4], resp: [4,4,2,2], conf: [3,3,3,4], repr: [4,4,5,2], trst: [5,5,5,1], intm: [4,4,4,2], team: [2,4,4,3] },
+      // Guesses about the other person, in area order (0 = really struggling … 4 = really good).
+      guesses: { a: [3, 3, 3, 2, 3, 4, 3, 4], b: [3, 2, 3, 1, 3, 4, 4, 3] },
+      important: { a: ["intm", "conf"], b: ["appr", "team"] } }
   ]
 };
 
@@ -323,7 +372,8 @@ let nameError = "";
 let resultsTab = "both";   // results screen: "both", "a" or "b"
 
 function fresh() {
-  return { mode: "two", stage: "intro", who: "a", step: 0, names: { a: "", b: "" }, answers: { a: {}, b: {} } };
+  return { mode: "two", stage: "intro", who: "a", step: 0, pilot: false, names: { a: "", b: "" }, answers: { a: {}, b: {} },
+    guesses: { a: {}, b: {} }, important: { a: [], b: [] }, csi: { a: [], b: [] } };
 }
 function load() {
   try {
@@ -351,7 +401,7 @@ function clearHash() {
 function newCheckin() {
   const keep = state.fromLink || state.mode === "one" ? { a: state.names.a, b: state.names.b }
     : { a: state.names[state.who], b: state.names[other(state.who)] };
-  state = { ...fresh(), names: keep };
+  state = { ...fresh(), names: keep, pilot: state.pilot };
   safety = { a: {}, b: {} }; confirmReset = false; pasteError = ""; view = null;
   clearHash();
   go();
@@ -367,7 +417,13 @@ function wipeAll() {
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const nm = w => esc(state.names[w] || (state.mode === "two" && w !== state.who ? "your partner" : (w === "a" ? "Partner 1" : "Partner 2")));
 const other = w => (w === "a" ? "b" : "a");
-const hasAll = ans => ITEMS.every(i => ans && ans[i.id] >= 1 && ans[i.id] <= 5);
+// 0 means "doesn't apply", allowed only on statements marked na.
+const hasAll = ans => ITEMS.every(i => ans && ((ans[i.id] >= 1 && ans[i.id] <= 5) || (i.na && ans[i.id] === 0)));
+// Everything one person contributes to a check-in.
+function personOf(w) {
+  return { name: state.names[w], answers: state.answers[w], guesses: state.guesses[w], important: state.important[w],
+    csi: state.pilot && state.csi[w].length === CSI.length ? state.csi[w] : null };
+}
 
 /* ---------- Dates (whole days since 1 Jan 2024, local calendar) ---------- */
 const EPOCH = Date.UTC(2024, 0, 1);
@@ -379,11 +435,18 @@ function fmtDay(day, opts = { day: "numeric", month: "short", year: "numeric" })
 const shortDay = day => fmtDay(day, { day: "numeric", month: "short" });
 
 /* ---------- Link codes ----------
-   A person's code packs their 32 answers (base 5) and name into link-safe base32:
-   "1" (format version) + 15 answer chars + "." + name + "." + 2-char checksum.
+   A person's code packs their answers and name into link-safe base32:
+   head + "." + name + "." + 2-char checksum. Two head formats:
+     v1: "1" + 15 chars        32 answers, 1–5 (base 5)
+     v2: "2" + 17 + 5 + 2 [+ 3] chars
+         32 answers, 0–5 with 0 = doesn't apply (base 6); 8 guesses, 0 = none (base 6);
+         "matters most" areas as an 8-bit mask; pilot only: 4 satisfaction answers.
+   Changing the statements, areas or scales changes these formats: add a new version
+   character and keep decoding the old ones, or links already shared will misread.
    Links: #p-<person>  (one partner's answers)
           #r-<A>-<B>-<day>  (one check-in's results)
-          #h-<day>-<A>-<B>_<day>-<A>-<B>...  (a couple's history) */
+          #h-<day>-<A>-<B>_<day>-<A>-<B>...  (a couple's history)
+          #pilot  (opens the pilot-study version) */
 const B32 = "0123456789abcdefghijklmnopqrstuv";
 function bigToB32(n, len) { let s = ""; for (let k = 0; k < len; k++) { s = B32[Number(n & 31n)] + s; n >>= 5n; } return s; }
 function b32ToBig(s) { let n = 0n; for (const c of s) { const v = B32.indexOf(c); if (v < 0) throw new Error("bad"); n = n * 32n + BigInt(v); } return n; }
@@ -399,27 +462,56 @@ function b32ToBytes(s) {
   return new Uint8Array(out);
 }
 function checksum(s) { let h = 7; for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 1021; return bigToB32(BigInt(h), 2); }
-function encodePerson(name, ans) {
-  let n = 0n;
-  for (const it of ITEMS) n = n * 5n + BigInt(ans[it.id] - 1);
-  const body = "1" + bigToB32(n, 15) + "." + bytesToB32(new TextEncoder().encode((name || "").slice(0, 40)));
+// Digits in mixed radix -> fixed-width base32, and back.
+function packDigits(digits, radices, len) { let n = 0n; digits.forEach((d, k) => { n = n * BigInt(radices[k]) + BigInt(d); }); return bigToB32(n, len); }
+function unpackDigits(str, radices) {
+  let n = b32ToBig(str); const out = [];
+  for (let k = radices.length - 1; k >= 0; k--) { out.unshift(Number(n % BigInt(radices[k]))); n /= BigInt(radices[k]); }
+  if (n !== 0n) throw new Error("bad");
+  return out;
+}
+const CSI_RADICES = CSI.map(q => q.opts.length);
+function encodePerson(p) {
+  const ans = packDigits(ITEMS.map(i => p.answers[i.id]), ITEMS.map(() => 6), 17);
+  const guess = packDigits(DOMAINS.map(d => (p.guesses && p.guesses[d.id] != null ? p.guesses[d.id] + 1 : 0)), DOMAINS.map(() => 6), 5);
+  const mask = DOMAINS.reduce((m, d, k) => (p.important && p.important.includes(d.id) ? m | (1 << k) : m), 0);
+  const csi = p.csi ? packDigits(p.csi, CSI_RADICES, 3) : "";
+  const body = "2" + ans + guess + bigToB32(BigInt(mask), 2) + csi + "." + bytesToB32(new TextEncoder().encode((p.name || "").slice(0, 40)));
   return body + "." + checksum(body);
 }
 const decoded = new Map();
+function decodeHead(head) {
+  if (head[0] === "1" && head.length === 16) {
+    const vals = unpackDigits(head.slice(1), ITEMS.map(() => 5)).map(v => v + 1);
+    return { vals, guesses: null, important: null, csi: null };
+  }
+  if (head[0] === "2" && (head.length === 25 || head.length === 28)) {
+    const vals = unpackDigits(head.slice(1, 18), ITEMS.map(() => 6));
+    const g = unpackDigits(head.slice(18, 23), DOMAINS.map(() => 6));
+    const mask = Number(b32ToBig(head.slice(23, 25)));
+    const guesses = {};
+    DOMAINS.forEach((d, k) => { if (g[k]) guesses[d.id] = g[k] - 1; });
+    if (g.some(x => x > GUESS.length)) throw new Error("bad");
+    return {
+      vals, guesses: Object.keys(guesses).length ? guesses : null,
+      important: DOMAINS.filter((d, k) => mask & (1 << k)).map(d => d.id),
+      csi: head.length === 28 ? unpackDigits(head.slice(25), CSI_RADICES) : null
+    };
+  }
+  throw new Error("bad");
+}
 function decodePerson(code) {
   if (decoded.has(code)) return decoded.get(code);
   const parts = String(code).split(".");
   let out = null;
   if (parts.length === 3) {
     const [head, name, sum] = parts;
-    if (head.length === 16 && head[0] === "1" && checksum(head + "." + name) === sum) {
+    if (checksum(head + "." + name) === sum) {
       try {
-        let n = b32ToBig(head.slice(1));
-        const vals = [];
-        for (let k = 0; k < ITEMS.length; k++) { vals.unshift(Number(n % 5n) + 1); n /= 5n; }
+        const h = decodeHead(head);
         const answers = {};
-        ITEMS.forEach((it, k) => { answers[it.id] = vals[k]; });
-        out = { name: new TextDecoder().decode(b32ToBytes(name)), answers, code };
+        ITEMS.forEach((it, k) => { answers[it.id] = h.vals[k]; });
+        if (hasAll(answers)) out = { name: new TextDecoder().decode(b32ToBytes(name)), answers, guesses: h.guesses, important: h.important, csi: h.csi, code };
       } catch (e) { out = null; }
     }
   }
@@ -450,9 +542,9 @@ function parseShared(text) {
   const P = decodePerson(s);
   return P ? { type: "p", P } : null;
 }
-const myCode = () => (hasAll(state.answers[state.who]) ? encodePerson(state.names[state.who], state.answers[state.who]) : null);
+const myCode = () => (hasAll(state.answers[state.who]) ? encodePerson(personOf(state.who)) : null);
 const personLink = () => `${SITE_URL}#p-${myCode()}`;
-const resultsLink = () => `${SITE_URL}#r-${encodePerson(state.names.a, state.answers.a)}-${encodePerson(state.names.b, state.answers.b)}-${dayCode(state.day ?? todayDay())}`;
+const resultsLink = () => `${SITE_URL}#r-${encodePerson(personOf("a"))}-${encodePerson(personOf("b"))}-${dayCode(state.day ?? todayDay())}`;
 const historyLink = entries => `${SITE_URL}#h-${entries.map(e => `${dayCode(e.day)}-${e.A}-${e.B}`).join("_")}`;
 
 // Apply a link or pasted code. Returns true when the state changed.
@@ -464,7 +556,8 @@ function applyShared(r) {
     return true;
   }
   if (r.type === "r") {
-    state = { ...fresh(), stage: "results", names: { a: r.A.name, b: r.B.name }, answers: { a: r.A.answers, b: r.B.answers }, day: r.day ?? todayDay(), fromLink: true };
+    state = { ...fresh(), stage: "results", day: r.day ?? todayDay(), fromLink: true, pilot: !!(r.A.csi || r.B.csi) };
+    setPerson("a", r.A); setPerson("b", r.B);
     view = null;
     return true;
   }
@@ -473,22 +566,32 @@ function applyShared(r) {
   if (state.mode === "two" && mine && mine === P.code) { state.notice = "own"; return true; }
   // The partner link this device already holds (e.g. a reload): keep where we are.
   const them = other(state.who);
-  if (state.mode === "two" && hasAll(state.answers[them]) && encodePerson(state.names[them], state.answers[them]) === P.code) return false;
+  if (state.mode === "two" && hasAll(state.answers[them]) && encodePerson(personOf(them)) === P.code) return false;
   view = null;
   const started = state.mode === "two" && ["quiz", "support", "share", "invited"].includes(state.stage);
   if (started) {
-    state.names[them] = P.name; state.answers[them] = P.answers; state.notice = "";
+    setPerson(them, P); state.notice = "";
     if (state.stage === "share") state.stage = "results";
     return true;
   }
   // A new check-in from the partner. Keep this person's name from last time.
   const myName = state.fromLink ? "" : (state.mode === "two" ? state.names[state.who] : "");
-  state = { ...fresh(), who: "b", stage: "invited", names: { a: P.name, b: myName || "" }, answers: { a: P.answers, b: {} } };
+  state = { ...fresh(), who: "b", stage: "invited", pilot: !!P.csi };
+  setPerson("a", P); state.names.b = myName || "";
   return true;
+}
+// Put a decoded person into slot w of the current check-in.
+function setPerson(w, P) {
+  state.names[w] = P.name; state.answers[w] = { ...P.answers };
+  state.guesses[w] = { ...(P.guesses || {}) }; state.important[w] = [...(P.important || [])]; state.csi[w] = [...(P.csi || [])];
 }
 function handleHash() {
   const h = location.hash.slice(1);
   if (!h) return false;
+  if (h.toLowerCase() === "pilot") {
+    if (!state.pilot && ["intro", "invited"].includes(state.stage)) { state.pilot = true; return true; }
+    return false;
+  }
   const r = parseShared(h);
   return r ? applyShared(r) : false;
 }
@@ -509,7 +612,7 @@ function addToHistory(e) {
 function recordResults() {
   if (state.sample || state.stage !== "results" || !hasAll(state.answers.a) || !hasAll(state.answers.b)) return;
   if (state.day == null) state.day = todayDay();
-  addToHistory({ day: state.day, A: encodePerson(state.names.a, state.answers.a), B: encodePerson(state.names.b, state.answers.b) });
+  addToHistory({ day: state.day, A: encodePerson(personOf("a")), B: encodePerson(personOf("b")) });
 }
 const activeHistory = () => sampleHistory || saved;
 function groups() {
@@ -527,49 +630,72 @@ function series(entries) {
   const points = entries.map(e => {
     let A = decodePerson(e.A), B = decodePerson(e.B);
     if (normName(lx) !== normName(ly) && normName(A.name) === normName(ly) && normName(B.name) === normName(lx)) [A, B] = [B, A];
-    const R = analyse({ a: A.answers, b: B.answers });
+    const R = analyse({ a: A, b: B });
     return { e, day: e.day, a: R.overall.a, b: R.overall.b, rows: R.rows };
   });
   return { names: { a: lx, b: ly }, points };
 }
 
 /* ---------- Scoring ---------- */
-const adj = (item, v) => (item.r ? 6 - v : v);
+// Adjusted answer: reversed for warning-sign statements, null for "doesn't apply".
+const adj = (item, v) => (v === 0 || v == null ? null : item.r ? 6 - v : v);
+// An area's score is the average of the statements that apply; null if none do.
 function domainScore(d, ans) {
-  const vals = d.items.map(i => adj(i, ans[i.id]));
+  const vals = d.items.map(i => adj(i, ans[i.id])).filter(v => v !== null);
+  if (!vals.length) return null;
   return Math.round(((vals.reduce((s, x) => s + x, 0) / vals.length) - 1) / 4 * 100);
 }
-const bandLabel = { strength: "Strength", steady: "Steady", work: "Needs work", gap: "Seen differently" };
+const meanOf = xs => { const v = xs.filter(x => x !== null); return v.length ? Math.round(v.reduce((s, x) => s + x, 0) / v.length) : null; };
+const bandLabel = { strength: "Strength", steady: "Steady", work: "Needs work", gap: "Seen differently", na: "Doesn't apply" };
 const overallLine = s => (s >= STRONG ? "feels the relationship is in good shape" : s >= STEADY ? "feels the relationship is mostly steady, with some strain" : "feels the relationship is under real strain");
+const picked = (p, d) => !!(p && p.important && p.important.includes(d.id));
 
-function analyse(answers) {
+// P: { a: person, b: person }, each with answers and, from v2 codes on, guesses and important.
+function analyse(P) {
   const rows = DOMAINS.map(d => {
-    const a = domainScore(d, answers.a), b = domainScore(d, answers.b);
+    const a = domainScore(d, P.a.answers), b = domainScore(d, P.b.answers);
+    const imp = ["a", "b"].filter(w => picked(P[w], d));
+    if (a === null || b === null) return { d, a, b, lo: null, gap: null, status: "na", imp };
     const lo = Math.min(a, b), gap = Math.abs(a - b);
     const status = lo < STEADY ? "work" : gap >= GAP ? "gap" : (a >= STRONG && b >= STRONG) ? "strength" : "steady";
-    return { d, a, b, lo, gap, status };
+    return { d, a, b, lo, gap, status, imp };
   });
-  const overall = {
-    a: Math.round(rows.reduce((s, r) => s + r.a, 0) / rows.length),
-    b: Math.round(rows.reduce((s, r) => s + r.b, 0) / rows.length)
-  };
-  const priorities = rows.filter(r => r.status === "work" || r.status === "gap")
-    .sort((x, y) => x.lo - y.lo || y.gap - x.gap).slice(0, 3);
+  const overall = { a: meanOf(rows.map(r => r.a)), b: meanOf(rows.map(r => r.b)) };
+  // Lowest scores first, boosted when one or both partners said the area matters most.
+  const urgency = r => ((100 - r.lo) + r.gap / 2) * (1 + 0.3 * r.imp.length);
+  let priorities = rows.filter(r => r.status === "work" || r.status === "gap").sort((x, y) => urgency(y) - urgency(x)).slice(0, 3);
+  // Room left: an area you both said matters most, not yet a strength, is worth protecting.
+  if (priorities.length < 3) {
+    priorities = priorities.concat(rows.filter(r => r.status === "steady" && r.imp.length === 2).sort((x, y) => x.lo - y.lo).slice(0, 3 - priorities.length));
+  }
   const strengths = rows.filter(r => r.status === "strength");
   const talks = ITEMS.map(i => {
-    const ra = answers.a[i.id], rb = answers.b[i.id];
-    return { i, ra, rb, diff: Math.abs(adj(i, ra) - adj(i, rb)) };
+    const ra = P.a.answers[i.id], rb = P.b.answers[i.id];
+    const xa = adj(i, ra), xb = adj(i, rb);
+    return { i, ra, rb, diff: xa === null || xb === null ? 0 : Math.abs(xa - xb) };
   }).filter(x => x.diff >= 2).sort((x, y) => y.diff - x.diff).slice(0, 6);
-  return { rows, overall, priorities, strengths, talks };
+  // How well each partner read the other: w's guess against the other person's own score.
+  const reading = {};
+  ["a", "b"].forEach(w => {
+    const g = P[w].guesses, o = w === "a" ? "b" : "a";
+    if (!g) return;
+    const rowsR = rows.map(r => ({ d: r.d, guess: g[r.d.id] != null ? GUESS[g[r.d.id]].v : null, actual: r[o] }))
+      .filter(x => x.guess !== null && x.actual !== null)
+      .map(x => ({ ...x, diff: x.guess - x.actual }));
+    if (!rowsR.length) return;
+    reading[w] = { rows: rowsR, meanOff: Math.round(rowsR.reduce((s, x) => s + Math.abs(x.diff), 0) / rowsR.length),
+      misses: rowsR.filter(x => Math.abs(x.diff) >= MISREAD).sort((x, y) => Math.abs(y.diff) - Math.abs(x.diff)) };
+  });
+  return { rows, overall, priorities, strengths, talks, reading };
 }
 
 /* ---------- Change since last time ---------- */
 const signed = n => (n > 0 ? `+${n}` : n < 0 ? `−${Math.abs(n)}` : "±0");
-const meanGap = p => Math.round(p.rows.reduce((s, r) => s + r.gap, 0) / p.rows.length);
+const meanGap = p => meanOf(p.rows.map(r => r.gap));
 function vChange(prev, cur, names) {
   const X = esc(names.a || "Partner 1"), Y = esc(names.b || "Partner 2");
-  const moves = cur.rows.map((r, k) => ({ d: r.d, da: r.a - prev.rows[k].a, db: r.b - prev.rows[k].b }))
-    .filter(m => Math.abs(m.da) >= CHANGE || Math.abs(m.db) >= CHANGE)
+  const moves = cur.rows.map((r, k) => ({ d: r.d, da: r.a - prev.rows[k].a, db: r.b - prev.rows[k].b, ok: r.status !== "na" && prev.rows[k].status !== "na" }))
+    .filter(m => m.ok && (Math.abs(m.da) >= CHANGE || Math.abs(m.db) >= CHANGE))
     .sort((x, y) => (Math.abs(y.da) + Math.abs(y.db)) - (Math.abs(x.da) + Math.abs(x.db)));
   const kind = m => (m.da >= 0 && m.db >= 0 ? "up" : m.da <= 0 && m.db <= 0 ? "down" : "mixed");
   const kindLabel = { up: "Better", down: "Worse", mixed: "Mixed" };
@@ -601,17 +727,20 @@ function lineChart(points, pick, { w, h, mini, title }) {
   const Y = v => padT + (1 - v / 100) * (h - padT - padB);
   const grid = [0, STEADY, STRONG, 100].map(v => `<line class="grid${v === STEADY || v === STRONG ? " cut" : ""}" x1="${padL}" x2="${w - padR}" y1="${Y(v)}" y2="${Y(v)}"></line>
       <text class="axis-t" x="${padL - 5}" y="${Y(v) + 3.5}" text-anchor="end">${v}</text>`).join("");
-  const line = s => `<polyline class="ln ${s}" points="${points.map((p, i) => `${X(p, i).toFixed(1)},${Y(pick(p, s)).toFixed(1)}`).join(" ")}"></polyline>`;
-  const dots = s => points.map((p, i) => `<circle class="pt ${s}" cx="${X(p, i).toFixed(1)}" cy="${Y(pick(p, s)).toFixed(1)}" r="${i === points.length - 1 ? 4.5 : 3.5}"></circle>`).join("");
-  const li = points.length - 1, lp = points[li];
-  let ya = Y(pick(lp, "a")) + 4, yb = Y(pick(lp, "b")) + 4;
-  if (Math.abs(ya - yb) < 12) { const m = (ya + yb) / 2, up = pick(lp, "a") >= pick(lp, "b"); ya = m + (up ? -6 : 6); yb = m + (up ? 6 : -6); }
-  const ends = `<text class="end-t" x="${X(lp, li) + 8}" y="${ya}">${pick(lp, "a")}</text><text class="end-t" x="${X(lp, li) + 8}" y="${yb}">${pick(lp, "b")}</text>`;
+  const at = s => points.map((p, i) => ({ p, i, v: pick(p, s) })).filter(x => x.v !== null);
+  const line = s => `<polyline class="ln ${s}" points="${at(s).map(x => `${X(x.p, x.i).toFixed(1)},${Y(x.v).toFixed(1)}`).join(" ")}"></polyline>`;
+  const dots = s => at(s).map(x => `<circle class="pt ${s}" cx="${X(x.p, x.i).toFixed(1)}" cy="${Y(x.v).toFixed(1)}" r="${x.i === points.length - 1 ? 4.5 : 3.5}"></circle>`).join("");
+  const li = points.length - 1;
+  const endA = at("a").pop(), endB = at("b").pop();
+  let ya = endA ? Y(endA.v) + 4 : 0, yb = endB ? Y(endB.v) + 4 : 0;
+  if (endA && endB && endA.i === endB.i && Math.abs(ya - yb) < 12) { const m = (ya + yb) / 2, up = endA.v >= endB.v; ya = m + (up ? -6 : 6); yb = m + (up ? 6 : -6); }
+  const ends = (endA ? `<text class="end-t" x="${X(endA.p, endA.i) + 8}" y="${ya}">${endA.v}</text>` : "") + (endB ? `<text class="end-t" x="${X(endB.p, endB.i) + 8}" y="${yb}">${endB.v}</text>` : "");
   const xlab = mini ? "" : points.map((p, i) => (i === 0 || i === li || points.length <= 4)
     ? `<text class="axis-t" x="${X(p, i)}" y="${h - 8}" text-anchor="${i === 0 && points.length > 1 ? "start" : i === li && points.length > 1 ? "end" : "middle"}">${shortDay(p.day)}</text>` : "").join("");
   // Hover targets: one column per check-in, wider than the dots.
   const colW = points.length > 1 ? Math.max(14, (w - padL - padR) / (points.length - 1)) : 40;
-  const hits = points.map((p, i) => `<rect class="hit" x="${X(p, i) - colW / 2}" y="${padT}" width="${colW}" height="${h - padT - padB}"><title>${fmtDay(p.day)}: ${esc(title.a)} ${pick(p, "a")}, ${esc(title.b)} ${pick(p, "b")}</title></rect>`).join("");
+  const show = v => (v === null ? "doesn't apply" : v);
+  const hits = points.map((p, i) => `<rect class="hit" x="${X(p, i) - colW / 2}" y="${padT}" width="${colW}" height="${h - padT - padB}"><title>${fmtDay(p.day)}: ${esc(title.a)} ${show(pick(p, "a"))}, ${esc(title.b)} ${show(pick(p, "b"))}</title></rect>`).join("");
   return `<svg class="chart${mini ? "" : " overall"}" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(title.label)}">${grid}${line("a")}${line("b")}${dots("a")}${dots("b")}${ends}${xlab}${hits}</svg>`;
 }
 
@@ -641,8 +770,9 @@ function vIntro() {
   <header class="stack">
     <span class="eyebrow">Relationship check-in · two perspectives</span>
     <h1>How is it going, from both sides?</h1>
-    <p class="muted">Each of you answers 32 short statements on your own, in about five minutes. The check-in then shows how each of you sees the relationship, where you agree, where you see it differently, and what to work on first. Repeat it every month or so to see what's changing.</p>
+    <p class="muted">Each of you answers 32 short statements on your own, in about five minutes, then guesses how the other sees things. The check-in shows how each of you sees the relationship, where you agree, where you see it differently, how well you read each other, and what to work on first. Repeat it every month or so to see what's changing.</p>
   </header>
+  ${pilotBanner()}
   ${vHistoryTeaser()}
   <section class="panel stack-lg">
     <div class="row">
@@ -683,13 +813,18 @@ function vIntro() {
   </footer>`;
 }
 
+function pilotBanner() {
+  return state.pilot ? `<div class="banner"><b>Pilot study.</b> Thank you for taking part. There are four extra questions near the end, and afterwards you can choose to send your results to the research team.</div>` : "";
+}
+
 function vInvited() {
   return `
   <header class="stack">
     <span class="eyebrow">Relationship check-in · your turn</span>
     <h1 tabindex="-1">${cap(nm("a"))} has done their half</h1>
-    <p class="muted">Now answer 32 short statements on your own, in about five minutes. ${nm("a")}'s answers stay hidden until you've finished. Then you'll both see how each of you sees the relationship and what to work on first.</p>
+    <p class="muted">Now answer 32 short statements on your own, in about five minutes, then guess how ${nm("a")} sees things. ${cap(nm("a"))}'s answers stay hidden until you've finished. Then you'll both see how each of you sees the relationship, how well you read each other, and what to work on first.</p>
   </header>
+  ${pilotBanner()}
   <section class="panel stack-lg">
     <label class="field" for="name-self"><span>Your name</span>
       <input type="text" id="name-self" data-name="b" value="${esc(state.names.b)}" placeholder="e.g. Sam" autocomplete="off" maxlength="40"></label>
@@ -699,30 +834,59 @@ function vInvited() {
   </section>`;
 }
 
+// The steps one person goes through, in order.
+function stepList() {
+  return [...DOMAINS.map(d => ({ kind: "domain", d })), { kind: "guess" }, { kind: "important" },
+    ...(state.pilot ? [{ kind: "csi" }] : []), { kind: "safety" }];
+}
+const radioRow = (cls, w, key, dataAttr, opts, cur) => `<div class="scale ${cls}">
+    ${opts.map(([v, l, n]) => `<input type="radio" id="${w}-${key}-${v}" name="${w}-${key}" value="${v}" ${dataAttr}="${key}" ${cur === v ? "checked" : ""}>
+      <label for="${w}-${key}-${v}">${n != null ? `<span class="n">${n}</span><span class="l">${l}</span>` : `<span class="n">${l}</span>`}</label>`).join("")}
+  </div>`;
+
 function vQuiz() {
-  const w = state.who, step = state.step, total = DOMAINS.length + 1;
-  const isSafety = step === DOMAINS.length;
+  const w = state.who, steps = stepList(), step = state.step, total = steps.length, cur = steps[step];
   const pct = Math.round((step / total) * 100);
-  let body, title, sub;
-  if (!isSafety) {
-    const d = DOMAINS[step];
+  const them = nm(other(w));
+  let body, title, sub, foot = "";
+  if (cur.kind === "domain") {
+    const d = cur.d;
     title = d.name; sub = d.blurb;
     body = d.items.map(i => {
-      const cur = state.answers[w][i.id];
-      return `<fieldset class="q"><legend>${esc(i.t)}</legend><div class="scale">
-        ${SCALE.map(s => `<input type="radio" id="${w}-${i.id}-${s.v}" name="${w}-${i.id}" value="${s.v}" data-item="${i.id}" ${cur === s.v ? "checked" : ""}>
-          <label for="${w}-${i.id}-${s.v}"><span class="n">${s.v}</span><span class="l">${s.l}</span></label>`).join("")}
-      </div></fieldset>`;
+      const v = state.answers[w][i.id];
+      return `<fieldset class="q"><legend>${esc(i.t)}</legend>
+        ${radioRow("", w, i.id, "data-item", SCALE.map(s => [s.v, s.l, s.v]), v)}
+        ${i.na ? `<div class="na-row"><input type="radio" id="${w}-${i.id}-0" name="${w}-${i.id}" value="0" data-item="${i.id}" ${v === 0 ? "checked" : ""}><label for="${w}-${i.id}-0">Doesn't apply to us</label></div>` : ""}
+      </fieldset>`;
     }).join("");
+    foot = `1 = strongly disagree, 5 = strongly agree. Think about the past month and go with your first reaction.${d.items.some(i => i.na) ? " Choose “Doesn't apply to us” only if a statement really doesn't fit your relationship." : ""}`;
+  } else if (cur.kind === "guess") {
+    title = `How do you think ${them} sees it?`;
+    sub = `For each area, guess how ${them} would rate it over the past month. At the end, your guesses are compared with ${poss(them)} own answers.`;
+    body = DOMAINS.map(d => `<fieldset class="q"><legend>${d.name} <span class="legend-note">${d.blurb}</span></legend>
+        ${radioRow("guess", w, "g-" + d.id, "data-guess", GUESS.map((g, k) => [k, g.l]), state.guesses[w][d.id])}
+      </fieldset>`).join("").replace(/data-guess="g-/g, 'data-guess="');
+  } else if (cur.kind === "important") {
+    const chosen = state.important[w];
+    title = "What matters most to you right now?";
+    sub = `Pick the ${IMPORTANT_PICKS} areas you most want to be good at the moment. This helps put your results in order.`;
+    body = `<div class="picks">${DOMAINS.map(d => {
+      const on = chosen.includes(d.id);
+      return `<input type="checkbox" id="${w}-imp-${d.id}" value="${d.id}" data-imp="${d.id}" ${on ? "checked" : ""} ${!on && chosen.length >= IMPORTANT_PICKS ? "disabled" : ""}>
+        <label for="${w}-imp-${d.id}"><b>${d.name}</b><span>${d.blurb}</span></label>`;
+    }).join("")}</div>`;
+    foot = `${chosen.length} of ${IMPORTANT_PICKS} chosen.`;
+  } else if (cur.kind === "csi") {
+    title = "Overall";
+    sub = "Four standard questions used by relationship researchers. They help the pilot check that this check-in measures what it should. They don't change your results.";
+    body = CSI.map((q, k) => `<fieldset class="q"><legend>${esc(q.t)}</legend>
+        ${radioRow("list", w, "csi" + k, "data-csi", q.opts.map((l, v) => [v, l]), state.csi[w][k])}
+      </fieldset>`).join("").replace(/data-csi="csi/g, 'data-csi="');
   } else {
     title = "Just for you"; sub = "These two answers stay private. They are not saved, not included in any link, and never appear in a report.";
-    body = SAFETY.map(q => {
-      const cur = safety[w][q.id];
-      return `<fieldset class="q"><legend>${esc(q.t)}</legend><div class="scale three">
-        ${q.opts.map(([v, l]) => `<input type="radio" id="${w}-${q.id}-${v}" name="${w}-${q.id}" value="${v}" data-safe="${q.id}" ${cur === v ? "checked" : ""}>
-          <label for="${w}-${q.id}-${v}"><span class="n">${l}</span></label>`).join("")}
-      </div></fieldset>`;
-    }).join("");
+    body = SAFETY.map(q => `<fieldset class="q"><legend>${esc(q.t)}</legend>
+        ${radioRow("three", w, q.id, "data-safe", q.opts.map(([v, l]) => [v, l]), safety[w][q.id])}
+      </fieldset>`).join("");
   }
   const label = state.mode === "two" ? "Your answers" : nm(w);
   return `
@@ -735,9 +899,9 @@ function vQuiz() {
   <section class="panel">${body}</section>
   <div class="navrow">
     ${step > 0 ? `<button class="btn-ghost" data-act="back">Back</button>` : `<span></span>`}
-    <button class="btn" data-act="next" id="next-btn" ${complete() ? "" : "disabled"}>${isSafety ? "Finish my answers" : "Next"}</button>
+    <button class="btn" data-act="next" id="next-btn" ${complete() ? "" : "disabled"}>${cur.kind === "safety" ? "Finish my answers" : "Next"}</button>
   </div>
-  <p class="fine">1 = strongly disagree, 5 = strongly agree. Go with your first reaction about the last few weeks.</p>`;
+  ${foot ? `<p class="fine" id="step-foot">${foot}</p>` : ""}`;
 }
 
 function vSupport() {
@@ -787,7 +951,7 @@ function vShare() {
     <h2>How you see the relationship</h2>
     <p class="muted">${poss(cap(them))} view and the comparison between you appear once they've finished.</p>
   </header>
-  ${vIndividual(state.answers[state.who], nm(state.who), { self: true, w: state.who })}
+  ${vIndividual(personOf(state.who), nm(state.who), { self: true, w: state.who })}
   <section class="panel stack">
     <h3>Got a link back?</h3>
     <p class="note">When ${them} finishes, they'll get a results link to send you. If they did the check-in separately, paste their link here instead.</p>
@@ -807,24 +971,30 @@ function resetControls() {
 
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const poss = s => (/s$/i.test(s) ? `${s}'` : `${s}'s`);
-const answerLabel = v => SCALE.find(s => s.v === v).l;
+const answerLabel = v => (v === 0 ? "Doesn't apply" : SCALE.find(s => s.v === v).l);
 
 // One person's answers on their own: no comparison, nothing from the partner.
-function vIndividual(ans, label, { self, w }) {
+function vIndividual(person, label, { self, w }) {
+  const ans = person.answers;
   const rows = DOMAINS.map(d => {
-    const scored = d.items.map(i => ({ i, v: ans[i.id], a: adj(i, ans[i.id]) }));
+    const scored = d.items.map(i => ({ i, v: ans[i.id], a: adj(i, ans[i.id]) })).filter(x => x.a !== null);
     const score = domainScore(d, ans);
-    const hi = scored.reduce((x, y) => (y.a > x.a ? y : x)), lo = scored.reduce((x, y) => (y.a < x.a ? y : x));
-    return { d, score, band: score >= STRONG ? "strength" : score >= STEADY ? "steady" : "work", hi, lo };
+    const hi = scored.length ? scored.reduce((x, y) => (y.a > x.a ? y : x)) : null;
+    const lo = scored.length ? scored.reduce((x, y) => (y.a < x.a ? y : x)) : null;
+    const band = score === null ? "na" : score >= STRONG ? "strength" : score >= STEADY ? "steady" : "work";
+    return { d, score, band, hi, lo, imp: picked(person, d) };
   });
-  const overall = Math.round(rows.reduce((s, r) => s + r.score, 0) / rows.length);
-  const ranked = [...rows].sort((x, y) => y.score - x.score);
+  const overall = meanOf(rows.map(r => r.score));
+  const ranked = rows.filter(r => r.score !== null).sort((x, y) => y.score - x.score);
+  const notApplicable = rows.filter(r => r.score === null);
   const going = ranked.filter(r => r.score >= STEADY).slice(0, 3);
-  const strain = ranked.filter(r => r.score < STEADY).reverse();
+  // Lowest first, but areas this person said matter most come before the rest.
+  const strain = ranked.filter(r => r.score < STEADY).reverse().sort((x, y) => (y.imp ? 1 : 0) - (x.imp ? 1 : 0));
   // A spread of 3+ steps inside one area (e.g. agree with one statement, disagree with another).
-  const mixed = rows.filter(r => r.hi.a - r.lo.a >= 3);
+  const mixed = rows.filter(r => r.hi && r.hi.a - r.lo.a >= 3);
   const stood = ITEMS.map(i => ({ i, v: ans[i.id], a: adj(i, ans[i.id]) }))
-    .filter(x => x.a <= 2).sort((x, y) => x.a - y.a).slice(0, 5);
+    .filter(x => x.a !== null && x.a <= 2).sort((x, y) => x.a - y.a).slice(0, 5);
+  const impTag = r => (r.imp ? ` <span class="imp-tag">Matters most</span>` : "");
   const whose = self ? "your answers" : `${poss(label)} answers`;
   const bandText = overall >= STRONG ? "In good shape overall" : overall >= STEADY ? "Mostly steady, with some strain" : "Under real strain overall";
   const marks = `<span class="mark" style="left:${STEADY}%"></span><span class="mark" style="left:${STRONG}%"></span>`;
@@ -840,8 +1010,12 @@ function vIndividual(ans, label, { self, w }) {
     <p class="muted">Strongest to weakest. Tick marks at ${STEADY} and ${STRONG}.</p>
     <div>
       ${ranked.map(r => `<div class="domain">
-        <div class="domain-head"><h3>${r.d.name}</h3><span class="pill ${r.band}">${bandLabel[r.band]}</span></div>
+        <div class="domain-head"><h3>${r.d.name}${impTag(r)}</h3><span class="pill ${r.band}">${bandLabel[r.band]}</span></div>
         <div class="bar" aria-label="${r.d.name}: ${r.score} out of 100"><div class="track">${marks}<span class="fill ${w}" style="width:${r.score}%"></span></div><span class="val">${r.score}</span></div>
+      </div>`).join("")}
+      ${notApplicable.map(r => `<div class="domain">
+        <div class="domain-head"><h3>${r.d.name}</h3><span class="pill na">${bandLabel.na}</span></div>
+        <p class="note">Marked as not applying, so it isn't counted in the overall score.</p>
       </div>`).join("")}
     </div>
   </section>
@@ -849,7 +1023,7 @@ function vIndividual(ans, label, { self, w }) {
   <section class="panel stack">
     <h2>Going well</h2>
     ${going.length ? going.map(r => `<div class="priority">
-        <div class="domain-head"><h3>${r.d.name}</h3><span class="pill ${r.band}">${r.score}</span></div>
+        <div class="domain-head"><h3>${r.d.name}${impTag(r)}</h3><span class="pill ${r.band}">${r.score}</span></div>
         <p class="note">${r.d.blurb}. ${r.score >= STRONG ? "A clear strength to lean on." : "Steady, with room to grow."}</p>
       </div>`).join("")
       : `<p>No area scored ${STEADY} or above, which is a lot to carry. Talking to a counsellor, alone or together, can help.</p>`}
@@ -858,7 +1032,7 @@ function vIndividual(ans, label, { self, w }) {
   <section class="panel stack">
     <h2>Needs attention</h2>
     ${strain.length ? strain.map(r => `<div class="priority">
-        <div class="domain-head"><h3>${r.d.name}</h3><span class="pill work">${r.score}</span></div>
+        <div class="domain-head"><h3>${r.d.name}${impTag(r)}</h3><span class="pill work">${r.score}</span></div>
         <p><b>Try this week:</b> ${r.d.tip}</p>
       </div>`).join("")
       : `<p>No area scored below ${STEADY}.</p>`}
@@ -887,20 +1061,51 @@ function vIndividual(ans, label, { self, w }) {
   </section>`;
 }
 
-// ctx: { names, answers, day, mode, who, fromLink, sample, live }
+// How well each partner read the other, from their guesses. Empty for older check-ins without guesses.
+function vReading(R, N) {
+  const ws = ["a", "b"].filter(w => R.reading[w]);
+  if (!ws.length) return "";
+  const guessLabel = v => GUESS.find(g => g.v === v).l.toLowerCase();
+  const miss = (w, x) => {
+    const o = other(w);
+    const verdict = x.diff > 0 ? `${cap(N(w))} thought ${N(o)} was happier with this than ${N(o)} is.` : `${cap(N(w))} thought ${N(o)} was less happy with this than ${N(o)} is.`;
+    return `<div class="miss">
+      <div class="domain-head"><h3>${x.d.name}</h3><span class="pill gap">${Math.abs(x.diff)} points off</span></div>
+      <p>${cap(N(w))} guessed <b>${guessLabel(x.guess)}</b> (${x.guess}). ${cap(poss(N(o)))} own score: <b>${x.actual}</b>.</p>
+      <p class="note">${verdict}</p>
+    </div>`;
+  };
+  return `<section class="panel stack">
+    <h2>How well you read each other</h2>
+    <p class="muted">Each of you guessed how the other would rate each area. Here's how close those guesses were to the other person's own answers.</p>
+    <div class="read-cards">${ws.map(w => `<div class="read-card ${w}">
+      <span class="eyebrow">${cap(N(w))} reading ${N(other(w))}</span>
+      <span class="big-ish">${R.reading[w].meanOff}<small> points off on average</small></span>
+      <span class="note">${R.reading[w].misses.length ? `${R.reading[w].misses.length} blind spot${R.reading[w].misses.length > 1 ? "s" : ""}` : "No blind spots"}</span>
+    </div>`).join("")}</div>
+    ${ws.some(w => R.reading[w].misses.length) ? `<h3>Blind spots</h3><p class="note">Guesses ${MISREAD} or more points away from the other person's own score. These are often the most useful things to talk about: ask what the other person sees that you didn't.</p>`
+      + ws.flatMap(w => R.reading[w].misses.map(x => ({ w, x }))).sort((p, q) => Math.abs(q.x.diff) - Math.abs(p.x.diff)).slice(0, 5).map(m => miss(m.w, m.x)).join("")
+      : `<p>Every guess was within ${MISREAD} points of the other person's own score. You read each other well.</p>`}
+  </section>`;
+}
+
+// ctx: { people: { a, b }, day, mode, who, fromLink, sample, live, pilot }
 function vResults(ctx) {
-  const N = w => esc(ctx.names[w] || (ctx.mode === "two" && !ctx.fromLink && w !== ctx.who ? "your partner" : (w === "a" ? "Partner 1" : "Partner 2")));
-  const R = analyse(ctx.answers);
+  const N = w => esc(ctx.people[w].name || (ctx.mode === "two" && !ctx.fromLink && w !== ctx.who ? "your partner" : (w === "a" ? "Partner 1" : "Partner 2")));
+  const R = analyse(ctx.people);
   const marks = `<span class="mark" style="left:${STEADY}%"></span><span class="mark" style="left:${STRONG}%"></span>`;
   const bar = (w, v) => `<div class="bar" aria-label="${N(w)}: ${v} out of 100">
       <div class="track">${marks}<span class="fill ${w}" style="width:${v}%"></span></div><span class="val">${v}</span></div>`;
+  const impLine = r => (r.imp.length === 2 ? " You both said this matters most right now." : r.imp.length === 1 ? ` ${cap(N(r.imp[0]))} said this matters most right now.` : "");
   const reasonFor = r => {
     const lower = r.a < r.b ? "a" : "b";
-    if (r.status === "work" && r.gap >= GAP) return `${N(lower)} is feeling this much more than ${N(other(lower))} (${r[lower]} vs ${r[other(lower)]}).`;
-    if (r.status === "work") return `You both scored this below ${STEADY}.`;
-    return `You see this ${r.gap} points apart. Start by understanding why, before trying to fix anything.`;
+    if (r.status === "steady") return `Not a problem area, but you both said it matters most, so it's worth protecting.`;
+    if (r.status === "work" && r.gap >= GAP) return `${cap(N(lower))} is feeling this much more than ${N(other(lower))} (${r[lower]} vs ${r[other(lower)]}).` + impLine(r);
+    if (r.status === "work") return `You both scored this below ${STEADY}.` + impLine(r);
+    return `You see this ${r.gap} points apart. Start by understanding why, before trying to fix anything.` + impLine(r);
   };
-  const ansLabel = v => SCALE.find(s => s.v === v).l;
+  const ansLabel = answerLabel;
+  const impWho = r => (r.imp.length ? `<p class="imp-who">Matters most to ${r.imp.length === 2 ? "you both" : N(r.imp[0])}</p>` : "");
   const sendTo = ctx.fromLink ? "" : N(other(ctx.who));
   const selfFor = w => ctx.mode === "two" && !ctx.fromLink && !ctx.sample && w === ctx.who;
   const tab = resultsTab === "a" || resultsTab === "b" ? resultsTab : "both";
@@ -909,7 +1114,7 @@ function vResults(ctx) {
   </div>`;
 
   // The previous check-in for this couple, if this device has one.
-  const thisEntry = { day: ctx.day, A: encodePerson(ctx.names.a, ctx.answers.a), B: encodePerson(ctx.names.b, ctx.answers.b) };
+  const thisEntry = { day: ctx.day, A: encodePerson(ctx.people.a), B: encodePerson(ctx.people.b) };
   const g = groupFor(pairKey(thisEntry));
   let change = "";
   if (g) {
@@ -935,7 +1140,7 @@ function vResults(ctx) {
   </header>
 
   ${tabs}
-  ${tab !== "both" ? vIndividual(ctx.answers[tab], N(tab), { self: selfFor(tab), w: tab }) : `
+  ${tab !== "both" ? vIndividual(ctx.people[tab], N(tab), { self: selfFor(tab), w: tab }) : `
   <section class="scores">
     ${["a", "b"].map(w => `<div class="panel score ${w}">
       <span class="eyebrow">${N(w)}</span>
@@ -946,6 +1151,14 @@ function vResults(ctx) {
   </section>
 
   ${change}
+
+  ${ctx.pilot && ctx.live && !ctx.sample && ctx.people.a.csi && ctx.people.b.csi ? `<section class="panel stack pilot">
+    <span class="eyebrow">Pilot study</span>
+    <h2>Send your results to the research team</h2>
+    <p class="note">Only if you both agree. Copy this link and send it to the person who invited you to the pilot. It holds both sets of answers and guesses, but never your private safety answers. It's used only to check how well this check-in works.</p>
+    ${linkBox("pilot-link", resultsLink())}
+    <p class="fine">Please do the check-in again in about a week, without talking about your answers in between, and send that link too. Comparing the two shows how much scores move by chance.</p>
+  </section>` : ""}
 
   ${ctx.mode === "two" && !ctx.sample && ctx.live ? `<section class="panel stack">
     <h2>${sendTo ? `Send these results to ${sendTo}` : "Results link"}</h2>
@@ -963,13 +1176,16 @@ function vResults(ctx) {
       : `<p>Nothing is flagged as needing work, and you see things much the same way. Keep doing what you're doing, and use the statements below to stay curious about each other.</p>`}
   </section>
 
+  ${vReading(R, N)}
+
   <section class="panel stack">
     <h2>All eight areas</h2>
     <div class="legend"><span><span class="dot a"></span>${N("a")}</span><span><span class="dot b"></span>${N("b")}</span><span>Tick marks at ${STEADY} and ${STRONG}</span></div>
     <div>
       ${R.rows.map(r => `<div class="domain">
         <div class="domain-head"><h3>${r.d.name}</h3><span class="pill ${r.status}">${bandLabel[r.status]}</span></div>
-        ${bar("a", r.a)}${bar("b", r.b)}
+        ${impWho(r)}
+        ${r.a === null ? `<p class="note">${cap(N("a"))}: doesn't apply</p>` : bar("a", r.a)}${r.b === null ? `<p class="note">${cap(N("b"))}: doesn't apply</p>` : bar("b", r.b)}
       </div>`).join("")}
       <div class="axis" aria-hidden="true"><span style="left:0;transform:none">0</span><span style="left:${STEADY}%">${STEADY}</span><span style="left:${STRONG}%">${STRONG}</span><span style="left:100%;transform:translateX(-100%)">100</span></div>
     </div>
@@ -1082,9 +1298,13 @@ function vProgress() {
 
 /* ---------- Flow ---------- */
 function complete() {
-  const w = state.who;
-  if (state.step === DOMAINS.length) return SAFETY.every(q => safety[w][q.id]);
-  return DOMAINS[state.step].items.every(i => state.answers[w][i.id]);
+  const w = state.who, cur = stepList()[state.step];
+  if (!cur) return false;
+  if (cur.kind === "domain") return cur.d.items.every(i => state.answers[w][i.id] != null);
+  if (cur.kind === "guess") return DOMAINS.every(d => state.guesses[w][d.id] != null);
+  if (cur.kind === "important") return state.important[w].length === IMPORTANT_PICKS;
+  if (cur.kind === "csi") return CSI.every((q, k) => state.csi[w][k] != null);
+  return SAFETY.every(q => safety[w][q.id]);
 }
 function flagged(w) { return SAFETY.some(q => q.flag.includes(safety[w][q.id])); }
 function afterPartner(render = true) {
@@ -1094,28 +1314,30 @@ function afterPartner(render = true) {
   else state.stage = hasAll(state.answers[other(state.who)]) ? "results" : "share";
   if (render) go();
 }
-function sampleAnswers(c) {
-  const answers = { a: {}, b: {} };
-  ["a", "b"].forEach(w => DOMAINS.forEach(d => d.items.forEach((i, k) => { answers[w][i.id] = c[w][d.id][k]; })));
-  return answers;
+function samplePerson(c, w) {
+  const answers = {};
+  DOMAINS.forEach(d => d.items.forEach((i, k) => { answers[i.id] = c[w][d.id][k]; }));
+  const g = c.guesses && c.guesses[w];
+  return { name: SAMPLE.names[w], answers, guesses: g ? Object.fromEntries(DOMAINS.map((d, k) => [d.id, g[k]])) : null,
+    important: (c.important && c.important[w]) || [], csi: null };
 }
 function startSample() {
   resultsTab = "both";
   sampleHistory = SAMPLE.checkins.map(c => {
-    const ans = sampleAnswers(c);
-    return { day: isoToDay(c.date), A: encodePerson(SAMPLE.names.a, ans.a), B: encodePerson(SAMPLE.names.b, ans.b) };
+    return { day: isoToDay(c.date), A: encodePerson(samplePerson(c, "a")), B: encodePerson(samplePerson(c, "b")) };
   });
   const lastC = SAMPLE.checkins[SAMPLE.checkins.length - 1];
-  state = { ...fresh(), stage: "results", mode: "one", names: { ...SAMPLE.names }, answers: sampleAnswers(lastC), day: isoToDay(lastC.date), sample: true };
+  state = { ...fresh(), stage: "results", mode: "one", day: isoToDay(lastC.date), sample: true };
+  setPerson("a", samplePerson(lastC, "a")); setPerson("b", samplePerson(lastC, "b"));
   view = null;
   go();
 }
 function stateCtx() {
-  return { names: state.names, answers: state.answers, day: state.day, mode: state.mode, who: state.who, fromLink: !!state.fromLink, sample: !!state.sample, live: true };
+  return { people: { a: personOf("a"), b: personOf("b") }, day: state.day, mode: state.mode, who: state.who, fromLink: !!state.fromLink, sample: !!state.sample, live: true, pilot: state.pilot };
 }
 function entryCtx(e) {
   const A = decodePerson(e.A), B = decodePerson(e.B);
-  return { names: { a: A.name, b: B.name }, answers: { a: A.answers, b: B.answers }, day: e.day, mode: "one", who: "a", fromLink: true, sample: !!sampleHistory, live: false };
+  return { people: { a: A, b: B }, day: e.day, mode: "one", who: "a", fromLink: true, sample: !!sampleHistory, live: false, pilot: false };
 }
 async function copyLink(id) {
   const el = document.getElementById(id), status = document.getElementById(id + "-status");
@@ -1153,8 +1375,19 @@ app.addEventListener("input", e => {
 });
 app.addEventListener("change", e => {
   const t = e.target;
-  if (t.dataset.item) { state.answers[state.who][t.dataset.item] = Number(t.value); save(); }
-  else if (t.dataset.safe) { safety[state.who][t.dataset.safe] = t.value; }
+  const w = state.who;
+  if (t.dataset.item) { state.answers[w][t.dataset.item] = Number(t.value); save(); }
+  else if (t.dataset.guess) { state.guesses[w][t.dataset.guess] = Number(t.value); save(); }
+  else if (t.dataset.csi) { state.csi[w][Number(t.dataset.csi)] = Number(t.value); save(); }
+  else if (t.dataset.imp) {
+    const list = state.important[w].filter(id => id !== t.dataset.imp);
+    if (t.checked) list.push(t.dataset.imp);
+    state.important[w] = list.slice(0, IMPORTANT_PICKS); save();
+    app.querySelectorAll("input[data-imp]").forEach(x => { x.disabled = !x.checked && state.important[w].length >= IMPORTANT_PICKS; });
+    const foot = document.getElementById("step-foot");
+    if (foot) foot.textContent = `${state.important[w].length} of ${IMPORTANT_PICKS} chosen.`;
+  }
+  else if (t.dataset.safe) { safety[w][t.dataset.safe] = t.value; }
   else return;
   const nb = document.getElementById("next-btn");
   if (nb) nb.disabled = !complete();
@@ -1180,7 +1413,7 @@ app.addEventListener("click", e => {
   else if (act === "home") { view = null; sampleHistory = null; state = fresh(); load(); if (state.sample) state = fresh(); go(); }
   else if (act === "back") { state.step = Math.max(0, state.step - 1); go(); }
   else if (act === "next" && complete()) {
-    if (state.step < DOMAINS.length) { state.step++; go(); }
+    if (state.step < stepList().length - 1) { state.step++; go(); }
     else if (flagged(state.who)) { state.stage = "support"; safety[state.who] = {}; go(); }
     else afterPartner();
   }

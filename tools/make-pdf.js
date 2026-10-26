@@ -6,7 +6,7 @@ const root = path.join(__dirname, '..');
 const fontUrl = f => 'file://' + path.join(__dirname, 'fonts', f);
 const src = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const block = src.slice(src.indexOf('const SCALE'), src.indexOf('const STRONG'));
-const { SCALE, DOMAINS, SAFETY } = new Function(block + '; return { SCALE, DOMAINS, SAFETY };')();
+const { SCALE, DOMAINS, GUESS, IMPORTANT_PICKS } = new Function(block + '; return { SCALE, DOMAINS, GUESS, IMPORTANT_PICKS };')();
 const STEADY = 55, STRONG = 75, GAP = 20;
 let n = 0;
 const numbered = DOMAINS.map(d => ({ ...d, items: d.items.map(i => ({ ...i, n: ++n })) }));
@@ -18,15 +18,27 @@ const questionnaire = who => `
   <div class="runhead"><span>Both Sides Check-in</span><span>${who} copy</span></div>
   <h2>${who}: your answers</h2>
   <div class="namerow"><span>Name</span><i></i><span>Date</span><i class="short"></i></div>
-  <p class="lede">Answer on your own, without looking at your partner's copy. Circle one number for each statement, thinking about the last few months. Go with your first reaction.</p>
+  <p class="lede">Answer on your own, without looking at your partner's copy. Circle one number for each statement, thinking about the past month. Go with your first reaction. Tick <b>n/a</b> only if an intimacy statement really doesn't fit your relationship.</p>
   <div class="key">${SCALE.map(s => `<span><b>${s.v}</b> ${s.l}</span>`).join('')}</div>
   ${numbered.map(d => `
     <div class="area">
       <h3>${d.name}</h3>
       <table class="q">
-        ${d.items.map(i => `<tr><td class="num">${i.n}</td><td class="stmt">${esc(i.t)}</td><td class="circles">${[1,2,3,4,5].map(v => `<span>${v}</span>`).join('')}</td></tr>`).join('')}
+        ${d.items.map(i => `<tr><td class="num">${i.n}</td><td class="stmt">${esc(i.t)}</td><td class="circles">${[1,2,3,4,5].map(v => `<span>${v}</span>`).join('')}${i.na ? '<span class="na-box">n/a</span>' : '<span class="na-space"></span>'}</td></tr>`).join('')}
       </table>
     </div>`).join('')}
+</section>
+<section class="page">
+  <div class="runhead"><span>Both Sides Check-in</span><span>${who} copy</span></div>
+  <h2>How do you think your partner sees it?</h2>
+  <p class="lede">For each area, circle how you think your partner would rate it over the past month. You'll compare these guesses with their own answers.</p>
+  <table class="guess">
+    <tr><th class="l">Area</th>${GUESS.map(g => `<th>${g.l}</th>`).join('')}</tr>
+    ${DOMAINS.map(d => `<tr><td class="l"><b>${d.name}</b><br><span class="fine">${d.blurb}</span></td>${GUESS.map(() => '<td><span class="dot-o"></span></td>').join('')}</tr>`).join('')}
+  </table>
+  <h2 style="margin-top:16pt">What matters most to you right now?</h2>
+  <p class="lede">Tick the ${IMPORTANT_PICKS === 2 ? 'two' : IMPORTANT_PICKS} areas you most want to be good at the moment.</p>
+  <div class="picks">${DOMAINS.map(d => `<div><span class="tick"></span><span><b>${d.name}</b><br><span class="fine">${d.blurb}</span></span></div>`).join('')}</div>
 </section>`;
 
 const html = `<!doctype html><html><head><meta charset="utf-8">
@@ -61,11 +73,11 @@ ol.steps { margin:4pt 0 0; padding-left:16pt; } ol.steps li { margin-bottom:4pt;
 .key b { color:var(--ink); }
 .area { break-inside:avoid; margin-bottom:5pt; }
 table { border-collapse:collapse; width:100%; }
-table.q td { padding:2.6pt 0; border-top:0.5pt solid var(--line); vertical-align:middle; }
+table.q td { padding:2pt 0; border-top:0.5pt solid var(--line); vertical-align:middle; }
 td.num { width:8mm; color:var(--muted); font-variant-numeric:tabular-nums; font-size:9pt; }
 td.stmt { padding-right:8pt !important; }
-td.circles { width:52mm; white-space:nowrap; text-align:right; }
-td.circles span { display:inline-block; width:7mm; height:7mm; line-height:7mm; border:0.7pt solid var(--line); border-radius:50%; text-align:center; font-size:9pt; margin-left:2mm; font-variant-numeric:tabular-nums; }
+td.circles { width:58mm; white-space:nowrap; text-align:right; }
+td.circles span { display:inline-block; width:6.2mm; height:6.2mm; line-height:6.2mm; border:0.7pt solid var(--line); border-radius:50%; text-align:center; font-size:9pt; margin-left:2mm; font-variant-numeric:tabular-nums; }
 table.score th, table.score td { border:0.6pt solid var(--line); padding:5pt 5pt; text-align:center; font-size:9pt; font-variant-numeric:tabular-nums; }
 table.score th { background:var(--soft); font-weight:600; font-size:8pt; }
 table.score td.l { text-align:left; font-weight:600; }
@@ -88,6 +100,16 @@ table.track th.sub { font-size:7pt; color:var(--muted); }
 table.track td.l, table.track th.l { text-align:left; padding:0 6pt; width:40mm; font-weight:600; }
 table.track tr.dates td { height:16pt; } table.track tr.dates td.l { font-weight:400; }
 table.track tr.total td { border-top:1.2pt solid var(--ink); }
+td.circles span.na-box { width:auto; padding:0 1.6mm; border-radius:3pt; font-size:7.5pt; color:var(--muted); }
+td.circles span.na-space { display:inline-block; width:8mm; margin-left:2mm; border:0; }
+table.guess { margin-top:6pt; }
+table.guess th, table.guess td { border:0.6pt solid var(--line); padding:5pt 4pt; text-align:center; font-size:8.5pt; }
+table.guess th { background:var(--soft); font-weight:600; font-size:8pt; }
+table.guess td.l, table.guess th.l { text-align:left; width:52mm; }
+table.guess .dot-o { display:inline-block; width:6mm; height:6mm; border:0.7pt solid var(--line); border-radius:50%; }
+.picks { display:grid; grid-template-columns:1fr 1fr; gap:7pt 16pt; margin-top:6pt; }
+.picks > div { display:grid; grid-template-columns:7mm 1fr; align-items:start; }
+.picks .tick { display:inline-block; width:4mm; height:4mm; border:0.8pt solid var(--ink); border-radius:1pt; margin-top:1pt; }
 table.notes td { border-bottom:0.6pt solid var(--line); height:24pt; vertical-align:bottom; }
 table.notes td.d { width:24mm; color:var(--muted); font-size:8pt; }
 </style></head><body>
@@ -95,15 +117,15 @@ table.notes td.d { width:24mm; color:var(--muted); font-size:8pt; }
 <section class="page">
   <span class="eyebrow">Relationship check-in · paper version</span>
   <h1 style="margin:6pt 0 10pt">How is it going, from both sides?</h1>
-  <p class="lede">Each of you answers 32 short statements on your own, in about ten minutes. Then you score them together and see how each of you sees the relationship, where you agree, where you see it differently, and what to work on first.</p>
+  <p class="lede">Each of you answers 32 short statements on your own, then guesses how the other sees things. It takes about ten minutes. Then you score it together and see how each of you sees the relationship, where you see it differently, how well you read each other, and what to work on first.</p>
 
   <div class="box">
     <h3>How to use it</h3>
     <ol class="steps">
-      <li><b>Each take your own copy</b> (pages 2–3 for one of you, pages 4–5 for the other). Answer separately, without discussing or looking at each other's answers.</li>
-      <li><b>Score together</b> using the scoring sheet on page 6. It takes about ten minutes with a pen.</li>
-      <li><b>Pick one area to start with</b>, using page 7. Talk about the statements you answered most differently before trying to fix anything.</li>
-      <li><b>Repeat it every month or so</b> with fresh copies, and write your scores on the tracking page (page 8) to see what's changing.</li>
+      <li><b>Each take your own copy</b> (Partner 1 and Partner 2, three pages each). Answer separately, without discussing or looking at each other's answers.</li>
+      <li><b>Score together</b> using the scoring sheet, then compare your guesses on the "How well you read each other" page. About fifteen minutes with a pen.</li>
+      <li><b>Pick one area to start with</b>, using the "Start here" page. Talk about the statements you answered most differently, and the blind spots, before trying to fix anything.</li>
+      <li><b>Repeat it every month or so</b> with fresh copies, and write your scores on the tracking page to see what's changing.</li>
     </ol>
   </div>
 
@@ -126,9 +148,9 @@ ${questionnaire('Partner 2')}
   <div class="runhead"><span>Both Sides Check-in</span><span>Scoring sheet</span></div>
   <h2>Score it together</h2>
   <ol class="steps" style="margin-bottom:8pt">
-    <li>For each area, add up each partner's four circled numbers. For the statements in the <b>Reverse</b> column, count <b>6 minus</b> the number circled (so 5 counts as 1, 4 as 2, 3 stays 3). These are warning-sign statements, where agreeing is a bad sign.</li>
+    <li>For each area, add up each partner's four circled numbers. For the statements in the <b>Reverse</b> column, count <b>6 minus</b> the number circled (so 5 counts as 1, 4 as 2, 3 stays 3). These are warning-sign statements, where agreeing is a bad sign. If you ticked <b>n/a</b> for some intimacy statements, add up the ones you answered, divide by how many that was and multiply by 4 (round to the nearest whole number). If all four are n/a, leave intimacy out of your overall score.</li>
     <li>Each total is between 4 and 20. Convert it to a score out of 100 using the table below.</li>
-    <li>Write the gap between your two scores, and the status: go through the four rules below in order and use the first one that fits.</li>
+    <li>Write the gap between your two scores, and the status: go through the four rules below in order and use the first one that fits. Circle the names of the areas either of you ticked as mattering most.</li>
   </ol>
   <table class="score">
     <tr><th style="text-align:left">Area</th><th>Statements</th><th>Reverse</th><th>P1 total</th><th>P1 score</th><th>P2 total</th><th>P2 score</th><th>Gap</th><th>Status</th></tr>
@@ -158,9 +180,22 @@ ${questionnaire('Partner 2')}
 </section>
 
 <section class="page">
+  <div class="runhead"><span>Both Sides Check-in</span><span>How well you read each other</span></div>
+  <h2>How well you read each other</h2>
+  <p class="lede">Turn each guess into a number, then compare it with the other person's own score from the scoring sheet. A guess ${25} or more points away is a <b>blind spot</b>: one of the most useful things to talk about. Ask what the other person sees that you didn't.</p>
+  <div class="key">${GUESS.map(g => `<span><b>${g.v}</b> ${g.l}</span>`).join('')}</div>
+  <table class="score">
+    <tr><th style="text-align:left">Area</th><th>P1's guess</th><th>P2's score</th><th>Points off</th><th>P2's guess</th><th>P1's score</th><th>Points off</th></tr>
+    ${DOMAINS.map(d => `<tr><td class="l">${d.name}</td><td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>`).join('')}
+    <tr><td class="l">Average points off</td><td colspan="2" class="na"></td><td></td><td colspan="2" class="na"></td><td></td></tr>
+  </table>
+  <p style="margin-top:10pt">When a guess was higher than the other person's score, the guesser thought their partner was happier with that area than they are. When it was lower, they thought their partner was less happy than they are.</p>
+</section>
+
+<section class="page">
   <div class="runhead"><span>Both Sides Check-in</span><span>What to work on</span></div>
   <h2>Start here</h2>
-  <p class="lede">Pick up to three areas marked <b>Needs work</b> or <b>Seen differently</b>, starting with the lowest score. Try the matching suggestion for a week, then check in again. For a <b>Seen differently</b> area, start by understanding why your views differ before trying to fix anything.</p>
+  <p class="lede">Pick up to three areas marked <b>Needs work</b> or <b>Seen differently</b>, starting with the lowest score, and put ones either of you said matter most ahead of the rest. Try the matching suggestion for a week, then check in again. For a <b>Seen differently</b> area, start by understanding why your views differ before trying to fix anything.</p>
   ${DOMAINS.map(d => `<div class="tip"><h3>${d.name}</h3><p>${d.tip}</p></div>`).join('')}
   <p class="fine" style="margin-top:12pt">If several areas need work, or the same argument keeps coming back, a couples counsellor is a good next step.</p>
 </section>
