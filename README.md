@@ -1,6 +1,6 @@
 # Both Sides Check-in
 
-A five-minute relationship check-in for couples. Each partner answers 32 statements on their own phone, guesses how the other would rate each of the eight areas, and picks the two areas that matter most to them right now. The check-in then shows how each person sees the relationship, where they agree, where they see things differently, how well they read each other (blind spots), and what to work on first. Repeating it every month or so shows what is changing.
+A seven-minute relationship check-in for couples. Each partner answers 32 statements on their own phone, guesses how the other would rate each of the eight areas, and picks the two areas that matter most to them right now. The check-in then shows how each person sees the relationship, where they agree, where they see things differently, how well they read each other (blind spots), and what to work on first. Repeating it every month or so shows what is changing.
 
 This is a conversation starter, not a clinical assessment. The cut-offs (55 and 75 out of 100, a 20-point gap, a 13-point change) are provisional and have not been validated.
 
